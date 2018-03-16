@@ -172,18 +172,18 @@ class InventoryModule(BaseInventoryPlugin):
 
                 # set host vars from host info
                 try:
-                    for k, v in host:
+                    for k, v in host.items():
                         if k not in ('name', 'hostgroup_title', 'hostgroup_name'):
                             try:
                                 self.inventory.set_variable(host['name'], self.get_option('vars_prefix') + k, v)
                             except ValueError as e:
                                 self.display.warning("Could not set host info hostvar for %s, skipping %s: %s" % (host, k, to_native(e)))
                 except ValueError as e:
-                    self.display.warning("Could not get host info for %s, skipping: %s" % (host, to_native(e)))
+                    self.display.warning("Could not get host info for %s, skipping: %s" % (host['name'], to_native(e)))
 
                 # set host vars from params
                 if self.get_option('want_params'):
-                    for k, v in self._get_all_params_by_id(host['id']):
+                    for k, v in self._get_all_params_by_id(host['id']).items():
                         try:
                             self.inventory.set_variable(host['name'], k, v)
                         except ValueError as e:
