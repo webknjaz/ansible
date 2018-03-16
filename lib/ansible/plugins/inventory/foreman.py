@@ -26,6 +26,9 @@ DOCUMENTATION = '''
       group_prefix:
         description: prefix to apply to foreman groups
         default: foreman_
+      vars_prefix:
+        description: prefix to apply to host variables, does not include facts nor params
+        default: foreman_
       want_facts:
         description: Toggle, if True the plugin will retrieve host facts from the server
         type: boolean
@@ -172,7 +175,7 @@ class InventoryModule(BaseInventoryPlugin):
                     for k, v in host:
                         if k not in ('name', 'hostgroup_title', 'hostgroup_name'):
                             try:
-                                self.inventory.set_variable(host['name'], k, v)
+                                self.inventory.set_variable(host['name'], self.get_option('vars_prefix') + k, v)
                             except ValueError as e:
                                 self.display.warning("Could not set host info hostvar for %s, skipping %s: %s" % (host, k, to_native(e)))
                 except ValueError as e:
