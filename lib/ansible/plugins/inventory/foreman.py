@@ -103,20 +103,31 @@ class InventoryModule(BaseInventoryPlugin):
                     break
                 ret.raise_for_status()
                 json = ret.json()
-                # /hosts/:id has not results key
+
+                # process results
+                # FIXME: This assumes 'return type' matches a specific query,
+                #        it will break if we expand the queries and they dont have different types
                 if 'results' not in json:
-                    return json
-                # Facts are returned as dict in results not list
-                if isinstance(json['results'], MutableMapping):
-                    return json['results']
-                # List of all hosts is returned paginaged
-                results = results + json['results']
-                if len(results) >= json['subtotal']:
+                    # /hosts/:id dos not have a 'results' key
+                    results = json
                     break
-                params['page'] += 1
-                if len(json['results']) == 0:
-                    self.display.warning("Did not make any progress during loop. expected %d got %d" % (json['subtotal'], len(results)))
+                elif isinstance(json['results'], MutableMapping):
+                    # /facts are returned as dict in 'results'
+                    results = json['results']
                     break
+                else:
+                    # /hosts 's 'results' is a list of all hosts, returned is paginated
+                    results = results + json['results']
+
+                    # check for end of paging
+                    if len(results) >= json['subtotal']:
+                        break
+                    if len(json['results']) == 0:
+                        self.display.warning("Did not make any progress during loop. expected %d got %d" % (json['subtotal'], len(results)))
+                        break
+
+                    # get next page
+                    params['page'] += 1
 
             self.cache[url] = results
 
