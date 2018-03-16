@@ -21,13 +21,19 @@ DOCUMENTATION = '''
         description: forman authentication password
       validate_certs:
         description: verify SSL certificate if using https
+        type: boolean
         default: False
       group_prefix:
         description: prefix to apply to foreman groups
         default: foreman_
       want_facts:
-        description: Toggle to retrieve host facts or not from the server
+        description: Toggle, if True the plugin will retrieve host facts from the server
         type: boolean
+        default: False
+      want_params:
+        description: Toggle, if true the inventory will retrieve 'all_parameters' information as host vars
+        type: boolean
+        default: False
 '''
 
 import re
@@ -61,11 +67,6 @@ class InventoryModule(BaseInventoryPlugin):
 
         # from config
         self.foreman_url = None
-        self.foreman_user = None
-        self.foreman_pw = None
-        self.foreman_ssl_verify = True
-
-        self.group_prefix = 'foreman_'
 
         self.session = None
         self.cache = {}
@@ -82,19 +83,19 @@ class InventoryModule(BaseInventoryPlugin):
     def _get_session(self):
         if not self.session:
             self.session = requests.session()
-            self.session.auth = HTTPBasicAuth(self.foreman_user, self.foreman_pw)
-            self.session.verify = self.foreman_ssl_verify
+            self.session.auth = HTTPBasicAuth(self.get_option('user'), to_bytes(self.get_option('password')))
+            self.session.verify = self.get_option('validate_certs')
         return self.session
 
     def _get_json(self, url, ignore_errors=None):
 
         if not self.do_cache or url not in self.cache:
 
-            page = 1
             results = []
             s = self._get_session()
+            params = {'page': 1, 'per_page': 250}
             while True:
-                ret = s.get(url, params={'page': page, 'per_page': 250})
+                ret = s.get(url, params=params)
                 if ignore_errors and ret.status_code in ignore_errors:
                     break
                 ret.raise_for_status()
@@ -107,11 +108,11 @@ class InventoryModule(BaseInventoryPlugin):
                     return json['results']
                 # List of all hosts is returned paginaged
                 results = results + json['results']
-                if len(results) >= json['total']:
+                if len(results) >= json['subtotal']:
                     break
-                page += 1
+                params['page'] += 1
                 if len(json['results']) == 0:
-                    self.display.warning("Did not make any progress during loop. expected %d got %d" % (json['total'], len(results)))
+                    self.display.warning("Did not make any progress during loop. expected %d got %d" % (json['subtotal'], len(results)))
                     break
 
             self.cache[url] = results
@@ -134,8 +135,6 @@ class InventoryModule(BaseInventoryPlugin):
 
     def _get_facts(self, host):
         """Fetch all host facts of the host"""
-        if not self.get_option('want_facts'):
-            return {}
 
         ret = self._get_facts_by_id(host['id'])
         if len(ret.values()) == 0:
@@ -151,7 +150,7 @@ class InventoryModule(BaseInventoryPlugin):
         #> ForemanInventory.to_safe("foo-bar baz")
         'foo_barbaz'
         '''
-        regex = "[^A-Za-z0-9\_]"
+        regex = r"[^A-Za-z0-9\_]"
         return re.sub(regex, "_", word.replace(" ", ""))
 
     def _populate(self):
@@ -161,30 +160,44 @@ class InventoryModule(BaseInventoryPlugin):
             if host.get('name'):
                 self.inventory.add_host(host['name'])
 
-            # create directly mapped groups
-            group_name = host.get('hostgroup_title', host.get('hostgroup_name'))
-            if group_name:
-                group_name = self.to_safe('%s%s' % (self.group_prefix, group_name.lower()))
-                self.inventory.add_group(group_name)
-                self.inventory.add_child(group_name, host['name'])
+                # create directly mapped groups
+                group_name = host.get('hostgroup_title', host.get('hostgroup_name'))
+                if group_name:
+                    group_name = self.to_safe('%s%s' % (self.get_option('group_prefix'), group_name.lower()))
+                    self.inventory.add_group(group_name)
+                    self.inventory.add_child(group_name, host['name'])
 
-            # set host vars
-            try:
-                for k, v in self._get_all_params_by_id(host['id']):
-                    self.inventory.set_variable(host['name'], k, v)
-            except ValueError as e:
-                self.display.warning("Could not unpack params for %s, skipping: %s" % (host, to_native(e)))
+                # set host vars from host info
+                try:
+                    for k, v in host:
+                        if k not in ('name', 'hostgroup_title', 'hostgroup_name'):
+                            try:
+                                self.inventory.set_variable(host['name'], k, v)
+                            except ValueError as e:
+                                self.display.warning("Could not set host info hostvar for %s, skipping %s: %s" % (host, k, to_native(e)))
+                except ValueError as e:
+                    self.display.warning("Could not get host info for %s, skipping: %s" % (host, to_native(e)))
 
-            # set facts
-            self.inventory.set_variable(host['name'], 'ansible_facts', self._get_facts(host))
+                # set host vars from params
+                if self.get_option('want_params'):
+                    for k, v in self._get_all_params_by_id(host['id']):
+                        try:
+                            self.inventory.set_variable(host['name'], k, v)
+                        except ValueError as e:
+                            self.display.warning("Could not set parameter hostvar for %s, skipping %s: %s" % (host, k, to_native(e)))
+
+                # set host vars from facts
+                if self.get_option('want_facts'):
+                    self.inventory.set_variable(host['name'], 'ansible_facts', self._get_facts(host))
 
     def parse(self, inventory, loader, path, cache=True):
 
         super(InventoryModule, self).parse(inventory, loader, path)
 
+        #cache_key = self.get_cache_prefix(path)
+
         #TODO: enable caching
         #self.do_cache = cache
-        #cache_key = self.get_cache_prefix(path)
         #if cache_key not in inventory.cache:
         #    inventory.cache[cache_key] = {}
         #self.cache = inventory.cache[cache_key]
@@ -192,14 +205,8 @@ class InventoryModule(BaseInventoryPlugin):
         # read config from file, this sets 'options'
         self._read_config_data(path)
 
-        # get connection settings
+        # get connection host
         self.foreman_url = self.get_option('url')
-        self.foreman_pw = to_bytes(self.get_option('password'))
-        self.foreman_user = self.get_option('user')
-        self.foreman_ssl_verify = self.get_option('validate_certs')
-
-        # other options
-        self.group_prefix = self.get_option('group_prefix')
 
         # actually populate inventory
         self._populate()
