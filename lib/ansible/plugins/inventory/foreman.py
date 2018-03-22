@@ -208,13 +208,12 @@ class InventoryModule(BaseInventoryPlugin):
 
         super(InventoryModule, self).parse(inventory, loader, path)
 
-        #cache_key = self.get_cache_prefix(path)
-
-        #TODO: enable caching
-        #self.do_cache = cache
-        #if cache_key not in inventory.cache:
+        # TODO: enable caching
+        # cache_key = self.get_cache_prefix(path)
+        # self.do_cache = cache
+        # if cache_key not in inventory.cache:
         #    inventory.cache[cache_key] = {}
-        #self.cache = inventory.cache[cache_key]
+        # self.cache = inventory.cache[cache_key]
 
         # read config from file, this sets 'options'
         self._read_config_data(path)
