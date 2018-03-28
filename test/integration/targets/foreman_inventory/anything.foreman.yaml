@@ -1,0 +1,5 @@
+plugin: foreman
+url: http://localhost:8080
+user: ansible-reader
+password: changeme
+validate_certs: False
