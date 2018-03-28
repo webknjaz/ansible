@@ -36,7 +36,10 @@ class ForemanProvider(CloudProvider):
 
         :type args: TestConfig
         """
-        super(ForemanProvider, self).__init__(args, config_extension='.ini')
+        super(ForemanProvider, self).__init__(
+            args,
+            config_extension='.foreman.yaml',
+        )
 
         self.__container_from_env = os.getenv('ANSIBLE_FRMNSIM_CONTAINER')
         self.image = self.__container_from_env or (
@@ -142,6 +145,21 @@ class ForemanProvider(CloudProvider):
 
         self._set_cloud_config('foreman_host', foreman_host)
         self._set_cloud_config('foreman_port', foreman_port)
+
+        self._generate_foreman_config()
+
+    def _generate_foreman_config(self)
+        template_context = {
+            'FOREMAN_HOST': self._get_cloud_config('foreman_host'),
+            'FOREMAN_PORT': self._get_cloud_config('foreman_port'),
+        }
+
+        foreman_config_template = self._read_config_template()
+        foreman_config = self._populate_config_template(
+            foreman_config_template,
+            template_context,
+        )
+        self._write_config(foreman_config)
 
     def _get_simulator_address(self):
         results = docker_inspect(self.args, self.container_name)
