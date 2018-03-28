@@ -97,7 +97,7 @@ class ForemanProvider(CloudProvider):
 
     def _setup_dynamic(self):
         """Create a vcenter simulator using docker."""
-	foreman_port = 8080
+        foreman_port = 8080
         container_id = get_docker_container_id()
 
         if container_id:
@@ -111,11 +111,11 @@ class ForemanProvider(CloudProvider):
             docker_rm(self.args, self.container_name)
             results = []
 
-	display.info(
-	    '%s Foreman simulator docker container.'
-	    % ('Using the existing' if results else 'Starting a new'),
-	    verbosity=1,
-	)
+        display.info(
+            '%s Foreman simulator docker container.'
+            % ('Using the existing' if results else 'Starting a new'),
+            verbosity=1,
+        )
 
         if not results:
             if self.args.docker or container_id:
@@ -148,7 +148,7 @@ class ForemanProvider(CloudProvider):
 
         self._generate_foreman_config()
 
-    def _generate_foreman_config(self)
+    def _generate_foreman_config(self):
         template_context = {
             'FOREMAN_HOST': self._get_cloud_config('foreman_host'),
             'FOREMAN_PORT': self._get_cloud_config('foreman_port'),
