@@ -10,6 +10,8 @@ FOREMAN_CONFIG=test-config.foreman.yaml
 function _cleanup() {
     echo Cleanup: removing $FOREMAN_CONFIG...
     rm -vf "$FOREMAN_CONFIG"
+    unset ANSIBLE_CONFIG
+    unset FOREMAN_CONFIG
 }
 trap _cleanup INT TERM EXIT
 
