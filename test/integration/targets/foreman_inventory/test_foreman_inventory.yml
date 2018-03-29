@@ -1,8 +1,8 @@
 ---
 - hosts: localhost
   vars:
-    foreman_stub_host: "{{ lookup('env', 'foreman_host') }}"
-    foreman_stub_port: "{{ lookup('env', 'foreman_port') }}"
+    foreman_stub_host: "{{ lookup('env', 'FOREMAN_HOST') }}"
+    foreman_stub_port: "{{ lookup('env', 'FOREMAN_PORT') }}"
     foreman_stub_api_path: /api/v2
     foreman_stub_host_uri: "http://{{ foreman_stub_host }}:{{ foreman_stub_port }}"
     foreman_stub_api_uri: "{{ foreman_stub_host_uri }}{{ foreman_stub_api_path }}"

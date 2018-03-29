@@ -146,15 +146,15 @@ class ForemanProvider(CloudProvider):
         else:
             foreman_host = 'localhost'
 
-        self._set_cloud_config('foreman_host', foreman_host)
-        self._set_cloud_config('foreman_port', str(foreman_port))
+        self._set_cloud_config('FOREMAN_HOST', foreman_host)
+        self._set_cloud_config('FOREMAN_PORT', str(foreman_port))
 
         self._generate_foreman_config()
 
     def _generate_foreman_config(self):
         template_context = {
-            'FOREMAN_HOST': self._get_cloud_config('foreman_host'),
-            'FOREMAN_PORT': self._get_cloud_config('foreman_port'),
+            ev: self._get_cloud_config(ev)
+            for ev in ('FOREMAN_HOST', 'FOREMAN_PORT')
         }
 
         foreman_config_template = self._read_config_template()
@@ -186,5 +186,5 @@ class ForemanEnvironment(CloudEnvironment):
         """
 
         # Send the container IP down to the integration test(s)
-        env['foreman_host'] = self._get_cloud_config('foreman_host')
-        env['foreman_port'] = self._get_cloud_config('foreman_port')
+        env['FOREMAN_HOST'] = self._get_cloud_config('FOREMAN_HOST')
+        env['FOREMAN_PORT'] = self._get_cloud_config('FOREMAN_PORT')
