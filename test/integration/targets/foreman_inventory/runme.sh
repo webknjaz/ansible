@@ -4,9 +4,9 @@
 
 set -euo pipefail
 
+ANSIBLE_CONFIG=ansible.cfg
 FOREMAN_CONFIG=test-config.foreman.yaml
 
-# TODO: trap cleanup
 function _cleanup() {
     echo Cleanup: removing $FOREMAN_CONFIG...
     rm -vf "$FOREMAN_CONFIG"
