@@ -35,6 +35,14 @@
       var: inventory_hostname
   - debug:
       var: vars
+  - debug:
+      var: environment
+  - debug:
+      var: groups
+  - debug:
+      var: group_names
+  - debug:
+      var: hostvars
   
   #- debug:
   #    var: "hostvars[inventory_hostname]"
