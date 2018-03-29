@@ -31,7 +31,8 @@ class ForemanProvider(CloudProvider):
     Sets up Foreman stub server for tests.
     """
 
-    DOCKER_SIMULATOR_NAME = 'foreman-simulator'
+    DOCKER_SIMULATOR_NAME = 'foreman-stub'
+    DOCKER_SIMULATOR_IMAGE_NAME = 'foreman-simulator'
 
     def __init__(self, args):
         """Set up container references for provider.
@@ -49,7 +50,7 @@ class ForemanProvider(CloudProvider):
             # The simulator must be pinned to a specific version
             # to guarantee CI passes with the version used:
             '@sha256:soooomeinvaaalidddshaaa'
-        ) % self.DOCKER_SIMULATOR_NAME
+        ) % self.DOCKER_SIMULATOR_IMAGE_NAME
         self.container_name = ''
 
     def filter(self, targets, exclude):
