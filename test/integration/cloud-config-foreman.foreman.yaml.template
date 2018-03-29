@@ -1,5 +1,0 @@
-plugin: foreman
-url: http://@FOREMAN_HOSTNAME:FOREMAN_PORT
-user: ansible-tester
-password: secure
-validate_certs: False

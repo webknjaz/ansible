@@ -149,21 +149,6 @@ class ForemanProvider(CloudProvider):
         self._set_cloud_config('FOREMAN_HOST', foreman_host)
         self._set_cloud_config('FOREMAN_PORT', str(foreman_port))
 
-        self._generate_foreman_config()
-
-    def _generate_foreman_config(self):
-        template_context = {
-            ev: self._get_cloud_config(ev)
-            for ev in ('FOREMAN_HOST', 'FOREMAN_PORT')
-        }
-
-        foreman_config_template = self._read_config_template()
-        foreman_config = self._populate_config_template(
-            foreman_config_template,
-            template_context,
-        )
-        self._write_config(foreman_config)
-
     def _get_simulator_address(self):
         results = docker_inspect(self.args, self.container_name)
         ip_address = results[0]['NetworkSettings']['IPAddress']
