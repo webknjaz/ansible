@@ -146,7 +146,7 @@ class ForemanProvider(CloudProvider):
             foreman_host = 'localhost'
 
         self._set_cloud_config('foreman_host', foreman_host)
-        self._set_cloud_config('foreman_port', foreman_port)
+        self._set_cloud_config('foreman_port', str(foreman_port))
 
         self._generate_foreman_config()
 
