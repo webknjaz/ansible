@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
-set -euo pipefail
-
 [[ -n "$DEBUG" ]] && set -x
 
-ansible-playbook test_foreman_inventory -v "$@"
+set -euo pipefail
+
+ansible-playbook test_foreman_inventory.yml -v "$@"
