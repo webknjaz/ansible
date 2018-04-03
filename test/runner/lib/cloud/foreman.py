@@ -47,6 +47,11 @@ class ForemanProvider(CloudProvider):
             'img_tag': DOCKER_SIMULATOR_IMAGE_TAG,
         },
     }
+    """Image registry to pull Foreman stub from.
+
+    It's source source itself resides at:
+    https://github.com/ansible/foreman-test-container
+    """
 
     DOCKER_REGISTRY = 'quay'
 
