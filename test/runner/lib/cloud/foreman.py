@@ -80,7 +80,7 @@ class ForemanProvider(CloudProvider):
                 # to guarantee CI passes with the version used:
                 '{registry_url}/{img_name}:{img_tag}'
             ).format(
-                **(image_src or self.DOCKER_IMAGES[DOCKER_REGISTRY])
+                **(image_src or self.DOCKER_IMAGES[self.DOCKER_REGISTRY])
             )
         self.container_name = ''
 
