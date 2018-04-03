@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 """Foreman plugin for integration tests."""
 
 from __future__ import absolute_import, print_function
@@ -22,7 +22,6 @@ from ..docker_util import (
     docker_pull,
     get_docker_container_id,
 )
-
 
 
 class ForemanProvider(CloudProvider):
