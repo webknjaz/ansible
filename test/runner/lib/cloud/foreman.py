@@ -41,13 +41,11 @@ class ForemanProvider(CloudProvider):
             'registry_url': 'registry.hub.docker.com',
             'img_name': DOCKER_SIMULATOR_IMAGE_NAME,
             'img_tag': DOCKER_SIMULATOR_IMAGE_TAG,
-            'sha256': '1749ec07cf1c98ad944d3b993a9acf5d6f22911f2edc32d83b6798b7329cd109',
         },
         'quay': {
             'registry_url': 'quay.io',
             'img_name': DOCKER_SIMULATOR_IMAGE_NAME,
             'img_tag': DOCKER_SIMULATOR_IMAGE_TAG,
-            'sha256': '0dbc096312badc1ac49f3179d7da7b9e6edce9f8efcfe2a286191d4d959fdf03',
         },
     }
 
@@ -75,7 +73,7 @@ class ForemanProvider(CloudProvider):
             self.image = (
                 # The simulator must be pinned to a specific version
                 # to guarantee CI passes with the version used:
-                '{registry_url}/{img_name}:{img_tag}@sha256:{sha256}'
+                '{registry_url}/{img_name}:{img_tag}'
             ).format(
                 **(image_src or random.choice(self.DOCKER_IMAGES))
             )
