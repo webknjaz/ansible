@@ -86,7 +86,7 @@ class ForemanProvider(CloudProvider):
         self.container_name = ''
 
     def filter(self, targets, exclude):
-        """Filter out the cloud tests when the necessary config and resources are not available.
+        """Filter out the tests with the necessary config and res unavailable.
 
         :type targets: tuple[TestTarget]
         :type exclude: list[str]
@@ -103,12 +103,13 @@ class ForemanProvider(CloudProvider):
         if skipped:
             exclude.append(skip)
             display.warning(
-                'Excluding tests marked "%s" which require the "%s" command: %s'
+                'Excluding tests marked "%s" '
+                'which require the "%s" command: %s'
                 % (skip.rstrip('/'), docker_cmd, ', '.join(skipped))
             )
 
     def setup(self):
-        """Setup the cloud resource before delegation and register a cleanup callback."""
+        """Setup cloud resource before delegation and reg cleanup callback."""
         super(ForemanProvider, self).setup()
 
         if self._use_static_config():
@@ -117,14 +118,14 @@ class ForemanProvider(CloudProvider):
             self._setup_dynamic()
 
     def get_docker_run_options(self):
-        """Get any additional options needed when delegating tests to a docker container.
+        """Get additional options needed when delegating tests to a container.
 
         :rtype: list[str]
         """
         return ['--link', self.DOCKER_SIMULATOR_NAME] if self.managed else []
 
     def cleanup(self):
-        """Clean up the cloud resource and any temporary configuration files after tests complete."""
+        """Clean up the resource and temporary configs files after tests."""
         if self.container_name:
             docker_rm(self.args, self.container_name)
 
@@ -136,7 +137,10 @@ class ForemanProvider(CloudProvider):
         container_id = get_docker_container_id()
 
         if container_id:
-            display.info('Running in docker container: %s' % container_id, verbosity=1)
+            display.info(
+                'Running in docker container: %s' % container_id,
+                verbosity=1,
+            )
 
         self.container_name = self.DOCKER_SIMULATOR_NAME
 
@@ -174,7 +178,10 @@ class ForemanProvider(CloudProvider):
             foreman_host = self.DOCKER_SIMULATOR_NAME
         elif container_id:
             foreman_host = self._get_simulator_address()
-            display.info('Found Foreman simulator container address: %s' % foreman_host, verbosity=1)
+            display.info(
+                'Found Foreman simulator container address: %s'
+                % foreman_host, verbosity=1
+        )
         else:
             foreman_host = 'localhost'
 
