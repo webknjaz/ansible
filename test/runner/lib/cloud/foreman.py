@@ -4,6 +4,7 @@
 from __future__ import absolute_import, print_function
 
 import os
+import random
 
 from . import (
     CloudProvider,
@@ -32,7 +33,23 @@ class ForemanProvider(CloudProvider):
     """
 
     DOCKER_SIMULATOR_NAME = 'foreman-stub'
-    DOCKER_SIMULATOR_IMAGE_NAME = 'foreman-simulator'
+    DOCKER_SIMULATOR_IMAGE_NAME = 'ansible/foreman-test-container'
+    DOCKER_SIMULATOR_IMAGE_TAG = '1.0.0'
+
+    DOCKER_IMAGES = {
+        'hub': {
+            'registry_url': 'registry.hub.docker.com',
+            'img_name': DOCKER_SIMULATOR_IMAGE_NAME,
+            'img_tag': DOCKER_SIMULATOR_IMAGE_TAG,
+            'sha256': '1749ec07cf1c98ad944d3b993a9acf5d6f22911f2edc32d83b6798b7329cd109',
+        },
+        'quay': {
+            'registry_url': 'quay.io',
+            'img_name': DOCKER_SIMULATOR_IMAGE_NAME,
+            'img_tag': DOCKER_SIMULATOR_IMAGE_TAG,
+            'sha256': '0dbc096312badc1ac49f3179d7da7b9e6edce9f8efcfe2a286191d4d959fdf03',
+        },
+    }
 
     def __init__(self, args):
         """Set up container references for provider.
@@ -45,12 +62,23 @@ class ForemanProvider(CloudProvider):
         )
 
         self.__container_from_env = os.getenv('ANSIBLE_FRMNSIM_CONTAINER')
-        self.image = self.__container_from_env or (
-            'ansible/ansible:%s'
-            # The simulator must be pinned to a specific version
-            # to guarantee CI passes with the version used:
-            '@sha256:soooomeinvaaalidddshaaa'
-        ) % self.DOCKER_SIMULATOR_IMAGE_NAME
+        """Overrides target container, might be used for development.
+
+        Use ANSIBLE_FRMNSIM_CONTAINER={hub|quay|whatever_you_want} if you want
+        to be explicit. Omit/empty otherwise.
+        """
+
+        image_src = self.DOCKER_IMAGES.get(self.__container_from_env, {})
+        if not image_src and self.__container_from_env:
+            self.image = self.__container_from_env
+        else:
+            self.image = (
+                # The simulator must be pinned to a specific version
+                # to guarantee CI passes with the version used:
+                '{registry_url}/{img_name}:{img_tag}@sha256:{sha256}'
+            ).format(
+                **(image_src or random.choice(self.DOCKER_IMAGES))
+            )
         self.container_name = ''
 
     def filter(self, targets, exclude):
