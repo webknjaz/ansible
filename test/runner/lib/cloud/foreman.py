@@ -47,10 +47,7 @@ class ForemanProvider(CloudProvider):
 
         :type args: TestConfig
         """
-        super(ForemanProvider, self).__init__(
-            args,
-            config_extension='.foreman.yaml',
-        )
+        super(ForemanProvider, self).__init__(args)
 
         self.__container_from_env = os.getenv('ANSIBLE_FRMNSIM_CONTAINER')
         """Overrides target container, might be used for development.
