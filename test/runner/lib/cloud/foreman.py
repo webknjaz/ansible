@@ -155,7 +155,7 @@ class ForemanProvider(CloudProvider):
             display.info(
                 'Found Foreman simulator container address: %s'
                 % foreman_host, verbosity=1
-        )
+            )
         else:
             foreman_host = 'localhost'
 
