@@ -11,6 +11,8 @@ DOCUMENTATION = '''
     short_description: foreman inventory source
     description:
         - Get inventory hosts from the foreman service.
+    extends_documentation_fragment:
+        - inventory_cache
     options:
       url:
         description: url to foreman
@@ -46,7 +48,7 @@ from distutils.version import LooseVersion
 
 from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_bytes, to_native
-from ansible.plugins.inventory import BaseInventoryPlugin
+from ansible.plugins.inventory import BaseInventoryPlugin, Cacheable
 
 # 3rd party imports
 try:
@@ -59,7 +61,7 @@ except ImportError:
 from requests.auth import HTTPBasicAuth
 
 
-class InventoryModule(BaseInventoryPlugin):
+class InventoryModule(BaseInventoryPlugin, Cacheable):
     ''' Host inventory parser for ansible using foreman as source. '''
 
     NAME = 'foreman'
@@ -72,8 +74,7 @@ class InventoryModule(BaseInventoryPlugin):
         self.foreman_url = None
 
         self.session = None
-        self.cache = {}
-        self.do_cache = True
+        self.cache_key = None
 
     def verify_file(self, path):
 
@@ -92,8 +93,7 @@ class InventoryModule(BaseInventoryPlugin):
 
     def _get_json(self, url, ignore_errors=None):
 
-        if not self.do_cache or url not in self.cache:
-
+        if not self.get_option('cache') or url not in self.cache.get(self.cache_key, {}):
             results = []
             s = self._get_session()
             params = {'page': 1, 'per_page': 250}
@@ -129,9 +129,9 @@ class InventoryModule(BaseInventoryPlugin):
                     # get next page
                     params['page'] += 1
 
-            self.cache[url] = results
+            self.cache[self.cache_key][url] = results
 
-        return self.cache[url]
+        return self.cache[self.cache_key][url]
 
     def _get_hosts(self):
         return self._get_json("%s/api/v2/hosts" % self.foreman_url)
@@ -211,16 +211,9 @@ class InventoryModule(BaseInventoryPlugin):
         # read config from file, this sets 'options'
         self._read_config_data(path)
 
-        cache_key = self.get_cache_prefix(path)
-        if cache:
-        #self.do_cache = cache
-        # if cache_key not in inventory.cache:
-        #    inventory.cache[cache_key] = {}
-        # self.cache = inventory.cache[cache_key]
-
-
         # get connection host
         self.foreman_url = self.get_option('url')
+        self.cache_key = self.get_cache_key(path)
 
         # actually populate inventory
         self._populate()
