@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-ANSIBLE_CONFIG=ansible.cfg
+export ANSIBLE_CONFIG=ansible.cfg
 FOREMAN_CONFIG=test-config.foreman.yaml
 
 function _cleanup() {
