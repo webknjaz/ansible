@@ -23,4 +23,4 @@ password: secure
 validate_certs: False
 FOREMAN_YAML
 
-ansible-playbook test_foreman_inventory.yml -v "$@"
+ansible-playbook test_foreman_inventory.yml --connection=local -v "$@"
