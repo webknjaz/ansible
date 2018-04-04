@@ -131,7 +131,7 @@ class ForemanProvider(CloudProvider):
         super(ForemanProvider, self).cleanup()
 
     def _setup_dynamic(self):
-        """Create a vcenter simulator using docker."""
+        """Spawn a Foreman stub within docker container."""
         foreman_port = 8080
         container_id = get_docker_container_id()
 
