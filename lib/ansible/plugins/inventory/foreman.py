@@ -75,6 +75,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
 
         self.session = None
         self.cache_key = None
+        self.use_cache = None
 
     def verify_file(self, path):
 
@@ -93,7 +94,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
 
     def _get_json(self, url, ignore_errors=None):
 
-        if not self.get_option('cache') or url not in self.cache.get(self.cache_key, {}):
+        if not self.use_cache or url not in self.cache.get(self.cache_key, {}):
             results = []
             s = self._get_session()
             params = {'page': 1, 'per_page': 250}
@@ -214,6 +215,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
         # get connection host
         self.foreman_url = self.get_option('url')
         self.cache_key = self.get_cache_key(path)
+        self.use_cache =  cache or self.get_option('cache')
 
         # actually populate inventory
         self._populate()
