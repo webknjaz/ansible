@@ -31,25 +31,29 @@
         heartbeat_resp.json.status != 'ok' or heartbeat_resp.json.response != 'pong'
 
   #### Testing start
-  - debug:
-      var: inventory_hostname
-  - debug:
-      var: vars
-  - debug:
-      var: environment
-  - debug:
-      var: groups
-  - debug:
-      var: group_names
-  - debug:
-      var: hostvars
-  
-  #- debug:
-  #    var: "hostvars[inventory_hostname]"
-  #
-  #- debug:
-  #    var: vars
-  
-  #- name:
-  #  assert:
+  - name: >
+      Check that there are 'foreman_pgagne_sats' and 'foreman_base'
+      groups present in inventory
+    assert:
+      that: >
+        '{{ item }}' in groups
+    with_items:
+    - foreman_pgagne_sats
+    - foreman_base
+
+  - name: Check that host are in appropriate groups
+    assert:
+      that: >
+        '{{ item.key }}' in groups['{{ item.value }}']
+    with_dict:
+      v6.example-780.com: foreman_base
+      c4.j1.y5.example-487.com: ungrouped
+
+  - name: Check host UUIDs
+    assert:
+      that: >
+        hostvars['{{ item.key }}']['foreman_subscription_facet_attributes']['uuid']  == '{{ item.value }}'
+    with_dict:
+      v6.example-780.com: 2c72fa49-995a-4bbf-bda0-684c7048ad9f
+      c4.j1.y5.example-487.com: 0a494b6e-7e90-4ed2-8edc-43a41436a242
   #### Testing end
