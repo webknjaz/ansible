@@ -5,12 +5,16 @@
 set -euo pipefail
 
 export ANSIBLE_CONFIG=ansible.cfg
+export FOREMAN_HOST="${FOREMAN_HOST:-localhost}"
+export FOREMAN_PORT="${FOREMAN_PORT:-8080}"
 FOREMAN_CONFIG=test-config.foreman.yaml
 
 function _cleanup() {
     echo Cleanup: removing $FOREMAN_CONFIG...
     rm -vf "$FOREMAN_CONFIG"
     unset ANSIBLE_CONFIG
+    unset FOREMAN_HOST
+    unset FOREMAN_PORT
     unset FOREMAN_CONFIG
 }
 trap _cleanup INT TERM EXIT
