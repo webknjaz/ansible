@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[[ -n "$DEBUG" ]] && set -x
+[[ -n "$DEBUG" || -n "$ANSIBLE_DEBUG" ]] && set -x
 
 set -euo pipefail
 
