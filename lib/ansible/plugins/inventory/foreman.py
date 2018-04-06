@@ -215,7 +215,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
         # get connection host
         self.foreman_url = self.get_option('url')
         self.cache_key = self.get_cache_key(path)
-        self.use_cache =  cache or self.get_option('cache')
+        self.use_cache =  cache and self.get_option('cache')
 
         # actually populate inventory
         self._populate()
