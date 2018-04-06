@@ -9,7 +9,8 @@ export FOREMAN_HOST="${FOREMAN_HOST:-localhost}"
 export FOREMAN_PORT="${FOREMAN_PORT:-8080}"
 FOREMAN_CONFIG=test-config.foreman.yaml
 
-_is_clean=  # flag for checking whether cleanup has already fired
+# flag for checking whether cleanup has already fired
+_is_clean=
 
 function _cleanup() {
     [[ -n "$_is_clean" ]] && return  # don't double-clean
