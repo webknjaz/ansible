@@ -2,6 +2,8 @@
 
 import json
 
+from .common._memoryview_compat import extract_bytes, memoryview
+
 
 CHUNK_SIZE = 2 ** 16  # 64KB
 RS_DELIMITER = b'\x1E'
@@ -29,7 +31,7 @@ def get_chunk_positions(input_mv):
     """Emit chunks for stream processing."""
     return (
         (n * CHUNK_SIZE, (n + 1) * CHUNK_SIZE)
-        for n in range((input_mv.nbytes // CHUNK_SIZE) + 1)
+        for n in range((len(input_mv) // CHUNK_SIZE) + 1)
     )
 
 
@@ -40,7 +42,7 @@ def find_absolute_doc_positions_in_stream(input_mv):
         if hanging_doc_pos is not None:
             hanging_doc_pos -= CHUNK_SIZE
 
-        b_stream_chunk = input_mv[stream_chunk_start: stream_chunk_end].tobytes()
+        b_stream_chunk = extract_bytes(input_mv[stream_chunk_start: stream_chunk_end])
         stream_chunk_pos_iter = find_documents_in_chunk(
             b_stream_chunk,
             hanging_doc_pos,
@@ -60,7 +62,7 @@ def read_json_document_strings(input_byte_stream):
     input_mv = memoryview(input_byte_stream.read())
 
     def get_text_from_mv_slice(start, end):
-        return input_mv[start:end].tobytes().decode('utf-8')
+        return extract_bytes(input_mv[start:end]).decode('utf-8')
 
     return (
         get_text_from_mv_slice(*doc_pos)
