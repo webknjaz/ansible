@@ -2,6 +2,7 @@
 
 import json
 
+from . import six
 from .common._memoryview_compat import extract_bytes, memoryview
 
 
@@ -11,14 +12,31 @@ RS_DELIMITER_ORD = ord(RS_DELIMITER)
 LF_DELIMITER = b'\x0A'  # ==LF==\n
 LF_DELIMITER_ORD = ord(LF_DELIMITER)
 
+if six.PY3:
+    def is_rs(char):
+        """Identify whether given char is <RS>."""
+        return char == RS_DELIMITER_ORD
+
+    def is_lf(char):
+        """Identify whether given char is <LF>."""
+        return char == LF_DELIMITER_ORD
+else:
+    def is_rs(char):
+        """Identify whether given char is <RS>."""
+        return char == RS_DELIMITER
+
+    def is_lf(char):
+        """Identify whether given char is <LF>."""
+        return char == LF_DELIMITER
+
 
 def find_documents_in_chunk(chunk, doc_start=None):
     """Emit subchunk positions of JSON record delimiters."""
     for pos, char in enumerate(chunk):
-        if char == RS_DELIMITER_ORD:
+        if is_rs(char):
             doc_start = pos
 
-        if char == LF_DELIMITER_ORD and doc_start is not None:
+        if is_lf(char) and doc_start is not None:
             yield doc_start, pos
             doc_start = None
 
