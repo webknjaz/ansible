@@ -9,6 +9,7 @@ import random
 
 import pytest
 
+from ansible.module_utils.common._memoryview_compat import memoryview
 from ansible.module_utils._json_streams_rfc7464 import (
     find_documents_in_chunk,
     get_chunk_positions,
