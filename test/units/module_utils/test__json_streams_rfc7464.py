@@ -28,17 +28,17 @@ PURE_PAYLOAD_SIZE = 143  # JSON byte strings + wrapping delimiter bytes
 def objects_sequence():
     """Clean sequence of objects for transmission."""
     return (
-        ["r", "🚑x", "s"],
-        {"x☃": "y"},
+        [u"r", u"🚑x", u"s"],
+        {u"x☃": u"y"},
         0,
-        "👷",
+        u"👷",
         [
-            "one",
-            "two",
+            u"one",
+            u"two",
             {
-                "three": {
-                    "four": 5,
-                    "six": "🐍even",
+                u"three": {
+                    u"four": 5,
+                    u"six": u"🐍even",
                 }
             }
         ],
