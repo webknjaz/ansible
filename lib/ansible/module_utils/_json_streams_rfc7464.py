@@ -2,7 +2,8 @@
 
 import json
 
-from . import six
+from ansible.module_utils.six import PY3
+
 from .common._memoryview_compat import extract_bytes, memoryview
 
 
@@ -12,7 +13,7 @@ RS_DELIMITER_ORD = ord(RS_DELIMITER)
 LF_DELIMITER = b'\x0A'  # ==LF==\n
 LF_DELIMITER_ORD = ord(LF_DELIMITER)
 
-if six.PY3:
+if PY3:
     def is_rs(char):
         """Identify whether given char is <RS>."""
         return char == RS_DELIMITER_ORD
