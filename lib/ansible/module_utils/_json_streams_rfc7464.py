@@ -4,7 +4,7 @@ import json
 
 from ansible.module_utils.six import PY3
 
-from .common._memoryview_compat import extract_bytes, memoryview
+from ansible.module_utils.common._memoryview_compat import extract_bytes, memoryview
 
 
 CHUNK_SIZE = 2 ** 16  # 64KB
