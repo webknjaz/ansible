@@ -1,3 +1,5 @@
+"""Compatibility utils for using the ``memoryviews``, Python 3 style."""
+
 from ansible.module_utils.six import PY3
 
 
