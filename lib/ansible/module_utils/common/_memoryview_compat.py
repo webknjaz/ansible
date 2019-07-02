@@ -1,25 +1,27 @@
 """Compatibility utils for using the ``memoryviews``, Python 3 style."""
 
-from ansible.module_utils.six import PY3
+from ansible.module_utils.six import moves, PY3
 
 
 if PY3:
-    """Python 3 has memoryview builtin."""
+    # Python 3 has memoryview builtin.
     # Python 2.7 has it backported, but socket.write() does
     # str(memoryview(b'0' * 100)) -> <memory at 0x7fb6913a5588>
     # instead of accessing it correctly.
-    memoryview = memoryview
+    # pylint: disable=invalid-name, redefined-builtin
+    memoryview = moves.builtins.memoryview
 else:
-    """Link memoryview to buffer under Python 2."""
-    memoryview = buffer  # noqa: F821
+    # Link memoryview to buffer under Python 2.
+    # pylint: disable=invalid-name, redefined-builtin
+    memoryview = moves.builtins.buffer
 
 
-def extract_bytes(mv):
+def extract_bytes(mem_view):
     """Retrieve bytes out of memoryview/buffer or bytes."""
-    if isinstance(mv, memoryview):
-        return mv.tobytes() if PY3 else bytes(mv)
+    if isinstance(mem_view, memoryview):
+        return mem_view.tobytes() if PY3 else bytes(mem_view)
 
-    if isinstance(mv, bytes):
-        return mv
+    if isinstance(mem_view, bytes):
+        return mem_view
 
     raise ValueError
