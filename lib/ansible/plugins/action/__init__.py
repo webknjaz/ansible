@@ -23,8 +23,9 @@ from ansible.executor.module_common import modify_module
 from ansible.executor.interpreter_discovery import discover_interpreter, InterpreterDiscoveryRequiredError
 from ansible.module_utils.common._collections_compat import Sequence
 from ansible.module_utils.json_utils import _filter_non_json_lines
-from ansible.module_utils.six import binary_type, string_types, text_type, iteritems, with_metaclass
+from ansible.module_utils.six import binary_type, string_types, text_type, iteritems, with_metaclass, BytesIO
 from ansible.module_utils.six.moves import shlex_quote
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
 from ansible.module_utils._text import to_bytes, to_native, to_text
 from ansible.parsing.utils.jsonify import jsonify
 from ansible.release import __version__
@@ -964,11 +965,15 @@ class ActionBase(with_metaclass(ABCMeta, object)):
 
     def _parse_returned_data(self, res):
         try:
-            filtered_output, warnings = _filter_non_json_lines(res.get('stdout', u''))
-            for w in warnings:
-                display.warning(w)
 
-            data = json.loads(filtered_output)
+            filtered_output = read_json_documents(BytesIO(res.get('stdout', u'').encode()))
+            try:
+                data = next(filtered_output)
+            except StopIteration:
+                filtered_output, warnings = _filter_non_json_lines(res.get('stdout', u''))
+                for w in warnings:
+                    display.warning(w)
+                data = json.loads(filtered_output)
             data['_ansible_parsed'] = True
         except ValueError:
             # not valid json, lets try to capture error

@@ -20,7 +20,13 @@ import time
 import syslog
 import multiprocessing
 
-from ansible.module_utils._text import to_text
+from ansible.module_utils.six import BytesIO
+from ansible.module_utils._json_streams_rfc7464 import (
+    LF_DELIMITER,
+    RS_DELIMITER,
+    read_json_documents,
+)
+from ansible.module_utils._text import to_bytes, to_text
 
 PY3 = sys.version_info[0] == 3
 
@@ -139,7 +145,6 @@ def _run_module(wrapped_cmd, jid, job_path):
     ipc_notifier.close()
 
     outdata = ''
-    filtered_outdata = ''
     stderr = ''
     try:
         cmd = shlex.split(wrapped_cmd)
@@ -156,9 +161,9 @@ def _run_module(wrapped_cmd, jid, job_path):
             outdata = outdata.decode('utf-8', 'surrogateescape')
             stderr = stderr.decode('utf-8', 'surrogateescape')
 
-        (filtered_outdata, json_warnings) = _filter_non_json_lines(outdata)
+        json_warnings = ()
+        result = next(read_json_documents(BytesIO(outdata.encode())))
 
-        result = json.loads(filtered_outdata)
 
         if json_warnings:
             # merge JSON junk warnings with any existing module warnings
@@ -201,11 +206,19 @@ def _run_module(wrapped_cmd, jid, job_path):
 
 def main():
     if len(sys.argv) < 5:
-        print(json.dumps({
-            "failed": True,
-            "msg": "usage: async_wrapper <jid> <time_limit> <modulescript> <argsfile> [-preserve_tmp]  "
-                   "Humans, do not call directly!"
-        }))
+        sys.stdout.buffer.write(
+            b''.join((
+                RS_DELIMITER,
+                to_bytes(json.dumps({
+                    "failed": True,
+                    "msg": "usage: async_wrapper <jid> "
+                           "<time_limit> <modulescript> "
+                           "<argsfile> [-preserve_tmp]  "
+                           "Humans, do not call directly!",
+                })),
+                LF_DELIMITER,
+            ))
+        )
         sys.exit(1)
 
     jid = "%s.%d" % (sys.argv[1], os.getpid())
@@ -235,10 +248,16 @@ def main():
         try:
             os.makedirs(jobdir)
         except Exception:
-            print(json.dumps({
-                "failed": 1,
-                "msg": "could not create: %s" % jobdir
-            }))
+            sys.stdout.buffer.write(
+                b''.join((
+                    RS_DELIMITER,
+                    to_bytes(json.dumps({
+                        "failed": 1,
+                        "msg": "could not create: %s" % jobdir,
+                    })),
+                    LF_DELIMITER,
+                ))
+            )
     # immediately exit this process, leaving an orphaned process
     # running which immediately forks a supervisory timing process
 
@@ -267,8 +286,20 @@ def main():
                     continue
 
             notice("Return async_wrapper task started.")
-            print(json.dumps({"started": 1, "finished": 0, "ansible_job_id": jid, "results_file": job_path,
-                              "_ansible_suppress_tmpdir_delete": not preserve_tmp}))
+            sys.stdout.buffer.write(
+                b''.join((
+                    RS_DELIMITER,
+                    to_bytes(json.dumps({
+                        "started": 1,
+                        "finished": 0,
+                        "ansible_job_id": jid,
+                        "results_file": job_path,
+                        "_ansible_suppress_tmpdir_delete":
+                        not preserve_tmp,
+                    })),
+                    LF_DELIMITER,
+                ))
+            )
             sys.stdout.flush()
             sys.exit(0)
         else:
@@ -328,10 +359,16 @@ def main():
     except Exception:
         e = sys.exc_info()[1]
         notice("error: %s" % e)
-        print(json.dumps({
-            "failed": True,
-            "msg": "FATAL ERROR: %s" % e
-        }))
+        sys.stdout.buffer.write(
+            b''.join((
+                RS_DELIMITER,
+                to_bytes(json.dumps({
+                    "failed": True,
+                    "msg": "FATAL ERROR: %s" % e
+                })),
+                LF_DELIMITER,
+            ))
+        )
         sys.exit(1)
 
 

@@ -79,6 +79,8 @@ except ImportError:
 # Python2 & 3 way to get NoneType
 NoneType = type(None)
 
+
+from ._json_streams_rfc7464 import LF_DELIMITER, RS_DELIMITER
 from ._text import to_native, to_bytes, to_text
 from ansible.module_utils.common.text.converters import (
     jsonify,
@@ -96,7 +98,16 @@ from ansible.module_utils.common.text.formatters import (
 try:
     from ansible.module_utils.common._json_compat import json
 except ImportError as e:
-    print('\n{{"msg": "Error: ansible requires the stdlib json: {0}", "failed": true}}'.format(to_native(e)))
+    sys.stdout.buffer.write(
+        b''.join((
+            RS_DELIMITER,
+            b'{{"msg": "Error: ansible requires the stdlib'
+            b' json: ',
+            to_bytes(e),
+            b'", "failed": true}}',
+            LF_DELIMITER,
+        )),
+    )
     sys.exit(1)
 
 
@@ -269,9 +280,17 @@ _PY3_MIN = sys.version_info[:2] >= (3, 5)
 _PY2_MIN = (2, 6) <= sys.version_info[:2] < (3,)
 _PY_MIN = _PY3_MIN or _PY2_MIN
 if not _PY_MIN:
-    print(
-        '\n{"failed": true, '
-        '"msg": "Ansible requires a minimum of Python2 version 2.6 or Python3 version 3.5. Current version: %s"}' % ''.join(sys.version.splitlines())
+    sys.stdout.buffer.write(
+        b''.join((
+            RS_DELIMITER,
+            b'{"failed": true, '
+            b'"msg": "Ansible requires a minimum of Python2 '
+            b'version 2.6 or Python3 version 3.5. '
+            b'Current version: '
+            b''.join(map(to_bytes, sys.version.splitlines())),
+            b'"}',
+            LF_DELIMITER,
+        )),
     )
     sys.exit(1)
 
@@ -535,7 +554,15 @@ def _load_params():
         params = json.loads(buffer.decode('utf-8'))
     except ValueError:
         # This helper used too early for fail_json to work.
-        print('\n{"msg": "Error: Module unable to decode valid JSON on stdin.  Unable to figure out what parameters were passed", "failed": true}')
+        sys.stdout.buffer.write(
+            b''.join((
+                RS_DELIMITER,
+                b'{"msg": "Error: Module unable to decode valid '
+                b'JSON on stdin.  Unable to figure out what '
+                b'parameters were passed", "failed": true}',
+                LF_DELIMITER,
+            )),
+        )
         sys.exit(1)
 
     if PY2:
@@ -546,8 +573,16 @@ def _load_params():
     except KeyError:
         # This helper does not have access to fail_json so we have to print
         # json output on our own.
-        print('\n{"msg": "Error: Module unable to locate ANSIBLE_MODULE_ARGS in json data from stdin.  Unable to figure out what parameters were passed", '
-              '"failed": true}')
+        sys.stdout.buffer.write(
+            b''.join((
+                RS_DELIMITER,
+                b'{"msg": "Error: Module unable to locate '
+                b'ANSIBLE_MODULE_ARGS in json data from '
+                b'stdin.  Unable to figure out what '
+                b'parameters were passed", "failed": true}',
+                LF_DELIMITER,
+            )),
+        )
         sys.exit(1)
 
 
@@ -643,7 +678,14 @@ class AnsibleModule(object):
             self.aliases = self._handle_aliases()
         except (ValueError, TypeError) as e:
             # Use exceptions here because it isn't safe to call fail_json until no_log is processed
-            print('\n{"failed": true, "msg": "Module alias error: %s"}' % to_native(e))
+            sys.stdout.buffer.write(
+                b''.join((
+                    RS_DELIMITER,
+                    b'{"failed": true, "msg": "Module alias '
+                    b'error: %s"}' % to_bytes(e),
+                    LF_DELIMITER,
+                )),
+            )
             sys.exit(1)
 
         # Save parameter values that should never be logged
@@ -2063,7 +2105,14 @@ class AnsibleModule(object):
             kwargs['deprecations'] = self._deprecations
 
         kwargs = remove_values(kwargs, self.no_log_values)
-        print('\n%s' % self.jsonify(kwargs))
+        sys.stdout.buffer.write(
+            b'\n%s%s%s'
+            % (
+                RS_DELIMITER,
+                to_bytes(self.jsonify(kwargs)),
+                LF_DELIMITER,
+            ),
+        )
 
     def exit_json(self, **kwargs):
         ''' return from the module, without error '''
