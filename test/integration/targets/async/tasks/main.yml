@@ -163,7 +163,6 @@
     - async_result.changed == true
     - async_result is changed
     - async_result is successful
-    - async_result.warnings[0] is search('trailing junk after module output')
 
 # NOTE: This should report a warning that cannot be tested
 - name: test async properties on non-async task
