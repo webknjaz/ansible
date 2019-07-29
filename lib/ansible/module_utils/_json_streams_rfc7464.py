@@ -1,5 +1,7 @@
 """RFC 7464 implementation of JSON documents streaming."""
 
+from __future__ import (absolute_import, division, print_function)
+
 import json
 
 from ansible.module_utils.six import PY3
@@ -7,6 +9,8 @@ from ansible.module_utils.six import PY3
 from ansible.module_utils.common._memoryview_compat import extract_bytes
 from ansible.module_utils.common._memoryview_compat import memoryview  # pylint: disable=redefined-builtin
 
+
+__metaclass__ = type
 
 CHUNK_SIZE = 2 ** 16  # 64KB
 RS_DELIMITER = b'\x1E'

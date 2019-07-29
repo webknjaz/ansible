@@ -1,7 +1,11 @@
 """Compatibility utils for using the ``memoryviews``, Python 3 style."""
 
+from __future__ import (absolute_import, division, print_function)
+
 from ansible.module_utils.six import moves, PY3
 
+
+__metaclass__ = type
 
 if PY3:
     # Python 3 has memoryview builtin.
