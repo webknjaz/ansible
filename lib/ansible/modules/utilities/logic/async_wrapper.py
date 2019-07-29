@@ -170,7 +170,6 @@ def _run_module(wrapped_cmd, jid, job_path):
         json_warnings = ()
         result = next(read_json_documents(BytesIO(outdata.encode())))
 
-
         if json_warnings:
             # merge JSON junk warnings with any existing module warnings
             module_warnings = result.get('warnings', [])
