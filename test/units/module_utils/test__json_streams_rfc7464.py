@@ -125,7 +125,9 @@ def objects_sequence_2():
 def json_stream_payload_3():
     """Stream with JSON record starting with LF."""
     return BytesIO(
-        b"\n\u001e{\"msg\": \"failed gracefully\", "
+        b"\n"
+        b"\x1e"  # \u001e
+        b"{\"msg\": \"failed gracefully\", "
         b"\"failed\": true, \"invocation\": "
         b"{\"module_args\": {\"fail_mode\": "
         b"[\"graceful\"]}}}\n",
