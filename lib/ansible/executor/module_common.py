@@ -36,6 +36,7 @@ from ansible import constants as C
 from ansible.errors import AnsibleError
 from ansible.executor.interpreter_discovery import InterpreterDiscoveryRequiredError
 from ansible.executor.powershell import module_manifest as ps_manifest
+from ansible.module_utils._stdout_utils import write_bytes_to_stdout
 from ansible.module_utils._text import to_bytes, to_text, to_native
 from ansible.plugins.loader import module_utils_loader
 # Must import strategy and use write_locks from there
@@ -197,7 +198,7 @@ def _ansiballz_main():
         runpy.run_module(mod_name='%(module_fqn)s', init_globals=None, run_name='__main__', alter_sys=False)
 
         # Ansible modules must exit themselves
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b''.join((
                 RS_DELIMITER,
                 b'{"msg": "New-style module did not '
@@ -298,7 +299,7 @@ def _ansiballz_main():
             runpy.run_module(mod_name='%(module_fqn)s', init_globals=None, run_name='__main__', alter_sys=False)
 
             # Ansible modules must exit themselves
-            sys.stdout.buffer.write(
+            write_bytes_to_stdout(
                 b''.join((
                     RS_DELIMITER,
                     b'{"msg": "New-style module did not '

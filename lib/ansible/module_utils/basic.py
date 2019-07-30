@@ -81,6 +81,7 @@ NoneType = type(None)
 
 
 from ._json_streams_rfc7464 import LF_DELIMITER, RS_DELIMITER
+from ._stdout_utils import write_bytes_to_stdout
 from ._text import to_native, to_bytes, to_text
 from ansible.module_utils.common.text.converters import (
     jsonify,
@@ -98,7 +99,7 @@ from ansible.module_utils.common.text.formatters import (
 try:
     from ansible.module_utils.common._json_compat import json
 except ImportError as e:
-    sys.stdout.buffer.write(
+    write_bytes_to_stdout(
         b''.join((
             RS_DELIMITER,
             b'{{"msg": "Error: ansible requires the stdlib'
@@ -280,7 +281,7 @@ _PY3_MIN = sys.version_info[:2] >= (3, 5)
 _PY2_MIN = (2, 6) <= sys.version_info[:2] < (3,)
 _PY_MIN = _PY3_MIN or _PY2_MIN
 if not _PY_MIN:
-    sys.stdout.buffer.write(
+    write_bytes_to_stdout(
         b''.join((
             RS_DELIMITER,
             b'{"failed": true, '
@@ -554,7 +555,7 @@ def _load_params():
         params = json.loads(buffer.decode('utf-8'))
     except ValueError:
         # This helper used too early for fail_json to work.
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b''.join((
                 RS_DELIMITER,
                 b'{"msg": "Error: Module unable to decode valid '
@@ -573,7 +574,7 @@ def _load_params():
     except KeyError:
         # This helper does not have access to fail_json so we have to print
         # json output on our own.
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b''.join((
                 RS_DELIMITER,
                 b'{"msg": "Error: Module unable to locate '
@@ -678,7 +679,7 @@ class AnsibleModule(object):
             self.aliases = self._handle_aliases()
         except (ValueError, TypeError) as e:
             # Use exceptions here because it isn't safe to call fail_json until no_log is processed
-            sys.stdout.buffer.write(
+            write_bytes_to_stdout(
                 b''.join((
                     RS_DELIMITER,
                     b'{"failed": true, "msg": "Module alias '
@@ -2105,7 +2106,7 @@ class AnsibleModule(object):
             kwargs['deprecations'] = self._deprecations
 
         kwargs = remove_values(kwargs, self.no_log_values)
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b'\n%s%s%s'
             % (
                 RS_DELIMITER,

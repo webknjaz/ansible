@@ -26,6 +26,7 @@ from ansible.module_utils._json_streams_rfc7464 import (
     RS_DELIMITER,
     read_json_documents,
 )
+from ansible.module_utils._stdout_utils import write_bytes_to_stdout
 from ansible.module_utils._text import to_bytes, to_text
 
 PY3 = sys.version_info[0] == 3
@@ -211,7 +212,7 @@ def _run_module(wrapped_cmd, jid, job_path):
 
 def main():
     if len(sys.argv) < 5:
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b''.join((
                 RS_DELIMITER,
                 to_bytes(json.dumps({
@@ -253,7 +254,7 @@ def main():
         try:
             os.makedirs(jobdir)
         except Exception:
-            sys.stdout.buffer.write(
+            write_bytes_to_stdout(
                 b''.join((
                     RS_DELIMITER,
                     to_bytes(json.dumps({
@@ -291,7 +292,7 @@ def main():
                     continue
 
             notice("Return async_wrapper task started.")
-            sys.stdout.buffer.write(
+            write_bytes_to_stdout(
                 b''.join((
                     RS_DELIMITER,
                     to_bytes(json.dumps({
@@ -364,7 +365,7 @@ def main():
     except Exception:
         e = sys.exc_info()[1]
         notice("error: %s" % e)
-        sys.stdout.buffer.write(
+        write_bytes_to_stdout(
             b''.join((
                 RS_DELIMITER,
                 to_bytes(json.dumps({
