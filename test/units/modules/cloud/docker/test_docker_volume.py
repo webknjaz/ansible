@@ -9,6 +9,9 @@ import json
 import pytest
 
 from ansible.modules.cloud.docker import docker_volume
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils.six import BytesIO
 from ansible.module_utils.docker import common
 
 pytestmark = pytest.mark.usefixtures('patch_ansible_module')
@@ -29,8 +32,9 @@ def test_create_volume_on_invalid_docker_version(mocker, capfd):
     with pytest.raises(SystemExit):
         docker_volume.main()
 
-    out, dummy = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
     assert results['failed']
     assert 'Error: Docker SDK for Python version is 1.8.0 ' in results['msg']
     assert 'Minimum version required is 1.10.0.' in results['msg']

@@ -38,11 +38,14 @@ from ansible.module_utils.six import PY2
 # basic.py
 MODULE_UTILS_BASIC_IMPORTS = frozenset((('ansible', '__init__'),
                                         ('ansible', 'module_utils', '__init__'),
+                                        ('ansible', 'module_utils', '_json_streams_rfc7464'),
+                                        ('ansible', 'module_utils', '_stdout_utils'),
                                         ('ansible', 'module_utils', '_text'),
                                         ('ansible', 'module_utils', 'basic'),
                                         ('ansible', 'module_utils', 'common', '__init__'),
                                         ('ansible', 'module_utils', 'common', '_collections_compat'),
                                         ('ansible', 'module_utils', 'common', '_json_compat'),
+                                        ('ansible', 'module_utils', 'common', '_memoryview_compat'),
                                         ('ansible', 'module_utils', 'common', 'collections'),
                                         ('ansible', 'module_utils', 'common', 'file'),
                                         ('ansible', 'module_utils', 'common', 'parameters'),
@@ -61,12 +64,15 @@ MODULE_UTILS_BASIC_IMPORTS = frozenset((('ansible', '__init__'),
                                         ('ansible', 'module_utils', 'six', '__init__'),
                                         ))
 
-MODULE_UTILS_BASIC_FILES = frozenset(('ansible/module_utils/_text.py',
+MODULE_UTILS_BASIC_FILES = frozenset(('ansible/module_utils/_json_streams_rfc7464.py',
+                                      'ansible/module_utils/_stdout_utils.py',
+                                      'ansible/module_utils/_text.py',
                                       'ansible/module_utils/basic.py',
                                       'ansible/module_utils/six/__init__.py',
                                       'ansible/module_utils/_text.py',
                                       'ansible/module_utils/common/_collections_compat.py',
                                       'ansible/module_utils/common/_json_compat.py',
+                                      'ansible/module_utils/common/_memoryview_compat.py',
                                       'ansible/module_utils/common/collections.py',
                                       'ansible/module_utils/common/parameters.py',
                                       'ansible/module_utils/parsing/convert_bool.py',
@@ -122,16 +128,20 @@ class TestRecursiveFinder(object):
     def test_module_utils_with_syntax_error(self, finder_containers):
         name = 'fake_module'
         data = b'#!/usr/bin/python\ndef something(:\n   pass\n'
-        with pytest.raises(ansible.errors.AnsibleError) as exec_info:
+        with pytest.raises(
+                ansible.errors.AnsibleError,
+                match='Unable to import fake_module due to invalid syntax',
+        ):
             recursive_finder(name, os.path.join(ANSIBLE_LIB, 'modules', 'system', 'fake_module.py'), data, *finder_containers)
-        assert 'Unable to import fake_module due to invalid syntax' in str(exec_info.value)
 
     def test_module_utils_with_identation_error(self, finder_containers):
         name = 'fake_module'
         data = b'#!/usr/bin/python\n    def something():\n    pass\n'
-        with pytest.raises(ansible.errors.AnsibleError) as exec_info:
+        with pytest.raises(
+                ansible.errors.AnsibleError,
+                match='Unable to import fake_module due to unexpected indent',
+        ):
             recursive_finder(name, os.path.join(ANSIBLE_LIB, 'modules', 'system', 'fake_module.py'), data, *finder_containers)
-        assert 'Unable to import fake_module due to unexpected indent' in str(exec_info.value)
 
     def test_from_import_toplevel_package(self, finder_containers, mocker):
         if PY2:

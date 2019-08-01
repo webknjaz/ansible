@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import json
 import os
 import sys
 
@@ -16,6 +15,9 @@ from linode_api4.errors import ApiError as LinodeApiError
 from linode_api4 import LinodeClient
 
 from ansible.modules.cloud.linode import linode_v4
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils.six import BytesIO
 from ansible.module_utils.linode import get_user_agent
 from units.modules.utils import set_module_args
 from units.compat import mock
@@ -26,8 +28,9 @@ def test_mandatory_state_is_validated(capfd):
         set_module_args({'label': 'foo'})
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert all(txt in results['msg'] for txt in ('state', 'required'))
     assert results['failed'] is True
@@ -38,8 +41,9 @@ def test_mandatory_label_is_validated(capfd):
         set_module_args({'state': 'present'})
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert all(txt in results['msg'] for txt in ('label', 'required'))
     assert results['failed'] is True
@@ -52,8 +56,9 @@ def test_mandatory_access_token_is_validated(default_args,
         set_module_args(default_args)
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['failed'] is True
     assert all(txt in results['msg'] for txt in (
@@ -100,8 +105,9 @@ def test_instance_by_label_cannot_authenticate(capfd, access_token,
         with pytest.raises(SystemExit):
             linode_v4.maybe_instance_from_label(module, client)
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['failed'] is True
     assert 'Unable to query the Linode API' in results['msg']
@@ -127,8 +133,9 @@ def test_optional_region_is_validated(default_args, capfd, access_token):
     with pytest.raises(SystemExit):
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['failed'] is True
     assert all(txt in results['msg'] for txt in (
@@ -145,8 +152,9 @@ def test_optional_type_is_validated(default_args, capfd, access_token):
     with pytest.raises(SystemExit):
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['failed'] is True
     assert all(txt in results['msg'] for txt in (
@@ -163,8 +171,9 @@ def test_optional_image_is_validated(default_args, capfd, access_token):
     with pytest.raises(SystemExit):
         linode_v4.initialise_module()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['failed'] is True
     assert all(txt in results['msg'] for txt in (
@@ -192,8 +201,9 @@ def test_instance_already_created(default_args,
 
     assert sys_exit_exc.value.code == 0
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['changed'] is False
     assert 'root_password' not in results['instance']
@@ -223,8 +233,9 @@ def test_instance_to_be_created_without_root_pass(default_args,
 
     assert sys_exit_exc.value.code == 0
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['changed'] is True
     assert (
@@ -255,8 +266,9 @@ def test_instance_to_be_created_with_root_pass(default_args,
 
     assert sys_exit_exc.value.code == 0
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['changed'] is True
     assert (
@@ -280,8 +292,9 @@ def test_instance_to_be_deleted(default_args,
 
     assert sys_exit_exc.value.code == 0
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['changed'] is True
     assert (
@@ -304,8 +317,9 @@ def test_instance_already_deleted_no_change(default_args,
 
     assert sys_exit_exc.value.code == 0
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert results['changed'] is False
     assert results['instance'] == {}

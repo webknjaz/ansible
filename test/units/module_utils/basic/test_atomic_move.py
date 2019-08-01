@@ -169,7 +169,7 @@ def test_rename_failure(atomic_am, atomic_mocks, mocker, capfd):
         atomic_am.atomic_move('/path/to/src', '/path/to/dest')
 
     out, err = capfd.readouterr()
-    results = json.loads(out)
+    results = json.loads(out[2:-1])
 
     assert 'Could not replace file' in results['msg']
     assert 'failing with EIO' in results['msg']
@@ -190,7 +190,7 @@ def test_rename_perms_fail_temp_creation_fails(atomic_am, atomic_mocks, mocker, 
         atomic_am.atomic_move('/path/to/src', '/path/to/dest')
 
     out, err = capfd.readouterr()
-    results = json.loads(out)
+    results = json.loads(out[2:-1])
 
     assert 'is not writable by the current user' in results['msg']
     assert results['failed']

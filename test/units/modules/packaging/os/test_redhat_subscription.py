@@ -1,13 +1,15 @@
 # Author: Jiri Hnidek (jhnidek@redhat.com)
 #
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+"""Test suite for Red Hat Subscription Ansible module."""
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-import json
-
 from ansible.module_utils import basic
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils.six import BytesIO
 from ansible.modules.packaging.os import redhat_subscription
 
 import pytest
@@ -35,8 +37,9 @@ def test_without_required_parameters(capfd, patch_redhat_subscription):
     """
     with pytest.raises(SystemExit):
         redhat_subscription.main()
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
     assert results['failed']
     assert 'state is present but any of the following are missing' in results['msg']
 
@@ -836,8 +839,9 @@ def test_redhat_subscribtion(mocker, capfd, patch_redhat_subscription, testcase)
     with pytest.raises(SystemExit):
         redhat_subscription.main()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
     assert 'changed' in results
     assert results['changed'] == testcase['changed']

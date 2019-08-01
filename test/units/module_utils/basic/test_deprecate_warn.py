@@ -16,7 +16,7 @@ def test_warn(am, capfd):
     with pytest.raises(SystemExit):
         am.exit_json(warnings=['warning2'])
     out, err = capfd.readouterr()
-    assert json.loads(out)['warnings'] == ['warning1', 'warning2']
+    assert json.loads(out[2:-1])['warnings'] == ['warning1', 'warning2']
 
 
 @pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
@@ -28,7 +28,7 @@ def test_deprecate(am, capfd):
         am.exit_json(deprecations=['deprecation3', ('deprecation4', '2.4')])
 
     out, err = capfd.readouterr()
-    output = json.loads(out)
+    output = json.loads(out[2:-1])
     assert ('warnings' not in output or output['warnings'] == [])
     assert output['deprecations'] == [
         {u'msg': u'deprecation1', u'version': None},
@@ -44,7 +44,7 @@ def test_deprecate_without_list(am, capfd):
         am.exit_json(deprecations='Simple deprecation warning')
 
     out, err = capfd.readouterr()
-    output = json.loads(out)
+    output = json.loads(out[2:-1])
     assert ('warnings' not in output or output['warnings'] == [])
     assert output['deprecations'] == [
         {u'msg': u'Simple deprecation warning', u'version': None},

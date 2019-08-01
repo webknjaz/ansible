@@ -36,7 +36,7 @@ class TestAnsibleModuleExitJson:
         assert ctx.value.code == 0
 
         out, err = capfd.readouterr()
-        return_val = json.loads(out)
+        return_val = json.loads(out[2:-1])
         assert return_val == expected
 
     # Fail_json is only legal if it's called with a message
@@ -50,7 +50,7 @@ class TestAnsibleModuleExitJson:
         assert ctx.value.code == 1
 
         out, err = capfd.readouterr()
-        return_val = json.loads(out)
+        return_val = json.loads(out[2:-1])
         # Fail_json should add failed=True
         expected['failed'] = True
         assert return_val == expected
@@ -105,7 +105,7 @@ class TestAnsibleModuleExitValuesRemoved:
             am.exit_json(**return_val)
         out, err = capfd.readouterr()
 
-        assert json.loads(out) == expected
+        assert json.loads(out[2:-1]) == expected
 
     # pylint bug: https://github.com/PyCQA/pylint/issues/511
     @pytest.mark.parametrize('am, stdin, return_val, expected',
@@ -118,4 +118,4 @@ class TestAnsibleModuleExitValuesRemoved:
             am.fail_json(**return_val) == expected
         out, err = capfd.readouterr()
 
-        assert json.loads(out) == expected
+        assert json.loads(out[2:-1]) == expected

@@ -1,10 +1,13 @@
-import json
+"""Test suite for RHN register Ansible module."""
+
 import os
 
 from units.compat.mock import mock_open
 from ansible.module_utils import basic
-from ansible.module_utils._text import to_native
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes, to_native
 import ansible.module_utils.six
+from ansible.module_utils.six import BytesIO
 from ansible.module_utils.six.moves import xmlrpc_client
 from ansible.modules.packaging.os import rhn_register
 
@@ -87,8 +90,9 @@ def test_systemid_requirements_missing(capfd, mocker, patch_rhn, import_libxml):
     with pytest.raises(SystemExit):
         rhn_register.main()
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
     assert results['failed']
     assert 'Missing arguments' in results['msg']
 
@@ -101,7 +105,8 @@ def test_without_required_parameters(capfd, patch_rhn):
     with pytest.raises(SystemExit):
         rhn_register.main()
     out, err = capfd.readouterr()
-    results = json.loads(out)
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
     assert results['failed']
     assert 'Missing arguments' in results['msg']
 
@@ -276,8 +281,9 @@ def test_register_parameters(mocker, capfd, mock_request, patch_rhn, testcase):
     assert xmlrpc_client.Transport.request.called == testcase['request_called']
     assert os.unlink.call_count == testcase['unlink.call_count']
 
-    out, err = capfd.readouterr()
-    results = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
     assert results.get('changed') == testcase.get('changed')
     assert results.get('failed') == testcase.get('failed')
     assert results['msg'] == testcase['msg']

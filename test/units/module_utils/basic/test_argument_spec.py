@@ -219,8 +219,8 @@ def test_validator_fail(stdin, capfd, argspec, expected):
 
     out, err = capfd.readouterr()
     assert not err
-    assert expected in json.loads(out)['msg']
-    assert json.loads(out)['failed']
+    assert expected in json.loads(out[2:-1])['msg']
+    assert json.loads(out[2:-1])['failed']
 
 
 class TestComplexArgSpecs:
@@ -260,7 +260,7 @@ class TestComplexArgSpecs:
             am = basic.AnsibleModule(**complex_argspec)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert results['msg'] == "parameters are mutually exclusive: bar|bam, bing|bang|bong"
@@ -272,7 +272,7 @@ class TestComplexArgSpecs:
             am = basic.AnsibleModule(**complex_argspec)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert results['msg'] == "parameters are required together: bam, baz"
@@ -285,7 +285,7 @@ class TestComplexArgSpecs:
             am = basic.AnsibleModule(**complex_argspec)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert results['msg'] == "parameters are required together: bam, baz"
@@ -301,7 +301,7 @@ class TestComplexArgSpecs:
             am = basic.AnsibleModule(**complex_argspec)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert results['msg'] == "parameters are required together: bam, baz"
@@ -313,7 +313,7 @@ class TestComplexArgSpecs:
             basic.AnsibleModule(**complex_argspec)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert results['msg'] == "value of zardoz2 must be one or more of: one, two, three. Got no match for: four, five"
@@ -487,7 +487,7 @@ class TestComplexOptions:
             am = basic.AnsibleModule(**options_argspec_dict)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert expected in results['msg']
@@ -499,7 +499,7 @@ class TestComplexOptions:
             am = basic.AnsibleModule(**options_argspec_list)
 
         out, err = capfd.readouterr()
-        results = json.loads(out)
+        results = json.loads(out[2:-1])
 
         assert results['failed']
         assert expected in results['msg']

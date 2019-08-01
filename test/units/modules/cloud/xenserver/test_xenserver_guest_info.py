@@ -7,9 +7,11 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-import json
 import pytest
 
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils.six import BytesIO
 from .common import fake_xenapi_ref
 
 pytestmark = pytest.mark.usefixtures('patch_ansible_module')
@@ -71,7 +73,8 @@ def test_xenserver_guest_info(mocker, capfd, XenAPI, xenserver_guest_info):
     with pytest.raises(SystemExit):
         xenserver_guest_info.main()
 
-    out, err = capfd.readouterr()
-    result = json.loads(out)
+    out, _err = capfd.readouterr()
+    b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+    results = next(read_json_documents(BytesIO(b_out)))
 
-    assert result['instance'] == fake_vm_facts
+    assert results['instance'] == fake_vm_facts

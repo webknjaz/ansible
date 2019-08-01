@@ -1,7 +1,10 @@
-import json
+"""Test suite for LXCA CCMS Ansible module."""
 
 import pytest
 from units.compat import mock
+from ansible.module_utils._json_streams_rfc7464 import read_json_documents
+from ansible.module_utils._text import to_bytes
+from ansible.module_utils.six import BytesIO
 from ansible.modules.remote_management.lxca import lxca_cmms
 
 
@@ -39,8 +42,9 @@ class TestMyModule():
             _setup_conn.return_value = "Fake connection"
             _execute_module.return_value = "Fake execution"
             lxca_cmms.main()
-        out, err = capfd.readouterr()
-        results = json.loads(out)
+        out, _err = capfd.readouterr()
+        b_out = to_bytes(out)  # capfdbinary is unavailable under Python 2.6
+        results = next(read_json_documents(BytesIO(b_out)))
         assert results['failed']
         assert 'missing required arguments' in results['msg']
 
