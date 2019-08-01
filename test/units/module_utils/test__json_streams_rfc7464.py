@@ -140,10 +140,12 @@ def objects_sequence_3():
     return {
         'msg': 'failed gracefully',
         'failed': True,
-        'module_args': {
-            'fail_mode': [
-                'graceful',
-            ],
+        'invocation': {
+            'module_args': {
+                'fail_mode': [
+                    'graceful',
+                ],
+            },
         },
     }
 
@@ -255,8 +257,8 @@ def test_read_async_json_payload(json_stream_payload_2, objects_sequence_2):
 def test_read_async_json_payload_3(json_stream_payload_3, objects_sequence_3):
     assert json_stream_payload_3.getvalue().count(b'\n') == 2
     assert tuple(find_documents_in_chunk(memoryview(json_stream_payload_3.getvalue()))) == ((1, 106), )
-    assert tuple(get_chunk_positions(memoryview(json_stream_payload_3.getvalue()))) == ()
-    assert tuple(read_json_documents(json_stream_payload_3)) == objects_sequence_3
+    assert tuple(get_chunk_positions(memoryview(json_stream_payload_3.getvalue()))) == ((0, 65536), )
+    assert tuple(read_json_documents(json_stream_payload_3)) == (objects_sequence_3, )
 
 
 def test_write_json_documents_to_stream(objects_sequence):
