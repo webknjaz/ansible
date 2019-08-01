@@ -1,11 +1,14 @@
 """Utils for supplying bytes to stdout."""
 
+from __future__ import (absolute_import, division, print_function)
+
 import sys
 
 from ansible.module_utils.six import PY3
 
 
 __all__ = ('write_bytes_to_stdout', )
+__metaclass__ = type
 
 
 def write_bytes_to_stdout(*args, **kwargs):

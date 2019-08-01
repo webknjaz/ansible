@@ -2,6 +2,8 @@
 """Tests for RFC 7464 JSON documents streaming utils."""
 # pylint: disable=redefined-outer-name
 
+from __future__ import (absolute_import, division, print_function)
+
 from io import BytesIO
 import json
 import os
@@ -20,6 +22,9 @@ from ansible.module_utils._json_streams_rfc7464 import (
     LF_DELIMITER,
     RS_DELIMITER,
 )
+
+
+__metaclass__ = type
 
 
 PURE_PAYLOAD_SIZE = 143  # JSON byte strings + wrapping delimiter bytes
