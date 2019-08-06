@@ -51,8 +51,7 @@ Function Exit-Json($obj)
         Set-Attr -obj $obj -name "changed" -value $false
     }
 
-    Write-Output ""
-    Write-Output $obj | ConvertTo-Json -Compress -Depth 99
+    Write-Output "" + ($obj | ConvertTo-Json -Compress -Depth 99)
     Exit
 }
 
@@ -87,8 +86,7 @@ Function Fail-Json($obj, $message = $null)
         Set-Attr -obj $obj -name "changed" -value $false
     }
 
-    Write-Output ""
-    Write-Output $obj | ConvertTo-Json -Compress -Depth 99
+    Write-Output "" + ($obj | ConvertTo-Json -Compress -Depth 99)
     Exit 1
 }
 
