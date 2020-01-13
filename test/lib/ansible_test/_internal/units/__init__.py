@@ -112,7 +112,9 @@ def command_units(args):
             # added in pytest 4.5.0, which requires python 2.7+
             cmd.append('--strict-markers')
 
-        plugins = []
+        plugins = [
+            'ansible_pytest_unit_test_module_mocks',
+        ]
 
         if args.coverage:
             plugins.append('ansible_pytest_coverage')
@@ -120,9 +122,9 @@ def command_units(args):
         if data_context().content.collection:
             plugins.append('ansible_pytest_collections')
 
-        if plugins:
-            env['PYTHONPATH'] += ':%s' % os.path.join(ANSIBLE_TEST_DATA_ROOT, 'pytest/plugins')
-            env['PYTEST_PLUGINS'] = ','.join(plugins)
+        env['PYTHONPATH'] += ':%s' % os.path.join(ANSIBLE_TEST_DATA_ROOT, 'pytest/plugins')
+        for plugin in plugins:
+            cmd.extend(('-p', plugin))
 
         if args.collect_only:
             cmd.append('--collect-only')

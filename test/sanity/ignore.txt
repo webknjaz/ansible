@@ -8419,8 +8419,6 @@ test/units/modules/cloud/xenserver/FakeAnsibleModule.py future-import-boilerplat
 test/units/modules/cloud/xenserver/FakeAnsibleModule.py metaclass-boilerplate
 test/units/modules/cloud/xenserver/FakeXenAPI.py future-import-boilerplate
 test/units/modules/cloud/xenserver/FakeXenAPI.py metaclass-boilerplate
-test/units/modules/conftest.py future-import-boilerplate
-test/units/modules/conftest.py metaclass-boilerplate
 test/units/modules/files/test_copy.py future-import-boilerplate
 test/units/modules/messaging/rabbitmq/test_rabbitmq_user.py future-import-boilerplate
 test/units/modules/messaging/rabbitmq/test_rabbitmq_user.py metaclass-boilerplate
