@@ -8321,8 +8321,6 @@ test/units/module_utils/cloud/test_backoff.py future-import-boilerplate
 test/units/module_utils/cloud/test_backoff.py metaclass-boilerplate
 test/units/module_utils/common/test_dict_transformations.py future-import-boilerplate
 test/units/module_utils/common/test_dict_transformations.py metaclass-boilerplate
-test/units/module_utils/conftest.py future-import-boilerplate
-test/units/module_utils/conftest.py metaclass-boilerplate
 test/units/module_utils/facts/base.py future-import-boilerplate
 test/units/module_utils/facts/hardware/test_sunos_get_uptime_facts.py future-import-boilerplate
 test/units/module_utils/facts/hardware/test_sunos_get_uptime_facts.py metaclass-boilerplate
