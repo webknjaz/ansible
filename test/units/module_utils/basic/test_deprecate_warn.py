@@ -9,23 +9,23 @@ import pytest
 
 
 @pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
-def test_warn(am, capfd):
+def test_warn(ansible_module, capfd):
 
-    am.warn('warning1')
+    ansible_module.warn('warning1')
 
     with pytest.raises(SystemExit):
-        am.exit_json(warnings=['warning2'])
+        ansible_module.exit_json(warnings=['warning2'])
     out, err = capfd.readouterr()
     assert json.loads(out)['warnings'] == ['warning1', 'warning2']
 
 
 @pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
-def test_deprecate(am, capfd):
-    am.deprecate('deprecation1')
-    am.deprecate('deprecation2', '2.3')
+def test_deprecate(ansible_module, capfd):
+    ansible_module.deprecate('deprecation1')
+    ansible_module.deprecate('deprecation2', '2.3')
 
     with pytest.raises(SystemExit):
-        am.exit_json(deprecations=['deprecation3', ('deprecation4', '2.4')])
+        ansible_module.exit_json(deprecations=['deprecation3', ('deprecation4', '2.4')])
 
     out, err = capfd.readouterr()
     output = json.loads(out)
@@ -39,9 +39,9 @@ def test_deprecate(am, capfd):
 
 
 @pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
-def test_deprecate_without_list(am, capfd):
+def test_deprecate_without_list(ansible_module, capfd):
     with pytest.raises(SystemExit):
-        am.exit_json(deprecations='Simple deprecation warning')
+        ansible_module.exit_json(deprecations='Simple deprecation warning')
 
     out, err = capfd.readouterr()
     output = json.loads(out)

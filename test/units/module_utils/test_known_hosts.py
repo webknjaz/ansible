@@ -96,21 +96,21 @@ def test_get_fqdn_and_port(url, fqdn, port):
                          ((URLS[k]['get_fqdn'], URLS[k]['port'], URLS[k]['add_host_key_cmd'], {})
                           for k in sorted(URLS) if URLS[k]['is_ssh_url']),
                          indirect=['ansible_module_args'])
-def test_add_host_key(am, mocker, fqdn, port, add_host_key_cmd):
+def test_add_host_key(ansible_module, mocker, fqdn, port, add_host_key_cmd):
     get_bin_path = mocker.MagicMock()
     get_bin_path.return_value = keyscan_cmd = "/custom/path/ssh-keyscan"
-    am.get_bin_path = get_bin_path
+    ansible_module.get_bin_path = get_bin_path
 
     run_command = mocker.MagicMock()
     run_command.return_value = (0, "Needs output, otherwise thinks ssh-keyscan timed out'", "")
-    am.run_command = run_command
+    ansible_module.run_command = run_command
 
     append_to_file = mocker.MagicMock()
     append_to_file.return_value = (None,)
-    am.append_to_file = append_to_file
+    ansible_module.append_to_file = append_to_file
 
     mocker.patch('os.path.isdir', return_value=True)
     mocker.patch('os.path.exists', return_value=True)
 
-    known_hosts.add_host_key(am, fqdn, port=port)
+    known_hosts.add_host_key(ansible_module, fqdn, port=port)
     run_command.assert_called_with(keyscan_cmd + add_host_key_cmd)

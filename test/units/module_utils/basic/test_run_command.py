@@ -80,12 +80,12 @@ def mock_subprocess(mocker):
 
 
 @pytest.fixture()
-def rc_am(mocker, am, mock_os, mock_subprocess):
-    am.fail_json = mocker.MagicMock(side_effect=SystemExit)
-    am._os = mock_os
-    am._subprocess = mock_subprocess
-    am.get_buffer_size = mocker.MagicMock(return_value=900)
-    yield am
+def rc_am(mocker, ansible_module, mock_os, mock_subprocess):
+    ansible_module.fail_json = mocker.MagicMock(side_effect=SystemExit)
+    ansible_module._os = mock_os
+    ansible_module._subprocess = mock_subprocess
+    ansible_module.get_buffer_size = mocker.MagicMock(return_value=900)
+    yield ansible_module
 
 
 class TestRunCommandArgs:
