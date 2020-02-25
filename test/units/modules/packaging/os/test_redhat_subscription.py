@@ -27,8 +27,8 @@ def patch_redhat_subscription(mocker):
                  return_value='/testbin/subscription-manager')
 
 
-@pytest.mark.parametrize('patch_ansible_module', [{}], indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
+@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
 def test_without_required_parameters(capfd, patch_redhat_subscription):
     """
     Failure must occurs when all parameters are missing
@@ -815,8 +815,8 @@ Entitlement Type:    Physical
 TEST_CASES_IDS = [item[1]['id'] for item in TEST_CASES]
 
 
-@pytest.mark.parametrize('patch_ansible_module, testcase', TEST_CASES, ids=TEST_CASES_IDS, indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
+@pytest.mark.parametrize('stdin, testcase', TEST_CASES, ids=TEST_CASES_IDS, indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
 def test_redhat_subscribtion(mocker, capfd, patch_redhat_subscription, testcase):
     """
     Run unit tests for test cases listen in TEST_CASES
@@ -1171,9 +1171,9 @@ System Purpose Status: Matched
 SYSPURPOSE_TEST_CASES_IDS = [item[1]['id'] for item in SYSPURPOSE_TEST_CASES]
 
 
-@pytest.mark.parametrize('patch_ansible_module, testcase', SYSPURPOSE_TEST_CASES, ids=SYSPURPOSE_TEST_CASES_IDS, indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
-def test_redhat_subscribtion_syspurpose(mocker, capfd, patch_redhat_subscription, patch_ansible_module, testcase, tmpdir):
+@pytest.mark.parametrize('stdin, testcase', SYSPURPOSE_TEST_CASES, ids=SYSPURPOSE_TEST_CASES_IDS, indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
+def test_redhat_subscribtion_syspurpose(mocker, capfd, patch_redhat_subscription, stdin, testcase, tmpdir):
     """
     Run unit tests for test cases listen in SYSPURPOSE_TEST_CASES (syspurpose specific cases)
     """

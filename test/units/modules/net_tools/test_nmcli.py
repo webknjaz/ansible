@@ -7,7 +7,7 @@ import pytest
 
 from ansible.modules.net_tools import nmcli
 
-pytestmark = pytest.mark.usefixtures('patch_ansible_module')
+pytestmark = pytest.mark.usefixtures('stdin')
 
 TESTCASE_CONNECTION = [
     {
@@ -238,7 +238,7 @@ def mocked_connection_exists(mocker):
     return connection
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_BOND, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_BOND, indirect=['stdin'])
 def test_bond_connection_create(mocked_generic_connection_create):
     """
     Test : Bond connection created
@@ -264,7 +264,7 @@ def test_bond_connection_create(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_GENERIC, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_GENERIC, indirect=['stdin'])
 def test_generic_connection_create(mocked_generic_connection_create):
     """
     Test : Generic connection created
@@ -288,7 +288,7 @@ def test_generic_connection_create(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_GENERIC, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_GENERIC, indirect=['stdin'])
 def test_generic_connection_modify(mocked_generic_connection_modify):
     """
     Test : Generic connection modify
@@ -309,7 +309,7 @@ def test_generic_connection_modify(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_GENERIC_DNS4_SEARCH, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_GENERIC_DNS4_SEARCH, indirect=['stdin'])
 def test_generic_connection_create_dns_search(mocked_generic_connection_create):
     """
     Test : Generic connection created with dns search
@@ -325,7 +325,7 @@ def test_generic_connection_create_dns_search(mocked_generic_connection_create):
     assert 'ipv6.dns-search' in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_GENERIC_DNS4_SEARCH, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_GENERIC_DNS4_SEARCH, indirect=['stdin'])
 def test_generic_connection_modify_dns_search(mocked_generic_connection_create):
     """
     Test : Generic connection modified with dns search
@@ -341,7 +341,7 @@ def test_generic_connection_modify_dns_search(mocked_generic_connection_create):
     assert 'ipv6.dns-search' in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_CONNECTION, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_CONNECTION, indirect=['stdin'])
 def test_dns4_none(mocked_connection_exists, capfd):
     """
     Test if DNS4 param is None
@@ -354,7 +354,7 @@ def test_dns4_none(mocked_connection_exists, capfd):
     assert results['changed']
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_BRIDGE, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_BRIDGE, indirect=['stdin'])
 def test_create_bridge(mocked_generic_connection_create):
     """
     Test if Bridge created
@@ -378,7 +378,7 @@ def test_create_bridge(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_BRIDGE, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_BRIDGE, indirect=['stdin'])
 def test_mod_bridge(mocked_generic_connection_modify):
     """
     Test if Bridge modified
@@ -399,7 +399,7 @@ def test_mod_bridge(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_BRIDGE_SLAVE, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_BRIDGE_SLAVE, indirect=['stdin'])
 def test_create_bridge_slave(mocked_generic_connection_create):
     """
     Test if Bridge_slave created
@@ -424,7 +424,7 @@ def test_create_bridge_slave(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_BRIDGE_SLAVE, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_BRIDGE_SLAVE, indirect=['stdin'])
 def test_mod_bridge_slave(mocked_generic_connection_modify):
     """
     Test if Bridge_slave modified
@@ -446,7 +446,7 @@ def test_mod_bridge_slave(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_VLAN, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_VLAN, indirect=['stdin'])
 def test_create_vlan_con(mocked_generic_connection_create):
     """
     Test if VLAN created
@@ -471,7 +471,7 @@ def test_create_vlan_con(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_VLAN, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_VLAN, indirect=['stdin'])
 def test_mod_vlan_conn(mocked_generic_connection_modify):
     """
     Test if VLAN modified
@@ -493,7 +493,7 @@ def test_mod_vlan_conn(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_VXLAN, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_VXLAN, indirect=['stdin'])
 def test_create_vxlan(mocked_generic_connection_create):
     """
     Test if vxlan created
@@ -518,7 +518,7 @@ def test_create_vxlan(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_VXLAN, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_VXLAN, indirect=['stdin'])
 def test_vxlan_mod(mocked_generic_connection_modify):
     """
     Test if vxlan modified
@@ -539,7 +539,7 @@ def test_vxlan_mod(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_IPIP, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_IPIP, indirect=['stdin'])
 def test_create_ipip(mocked_generic_connection_create):
     """
     Test if ipip created
@@ -569,7 +569,7 @@ def test_create_ipip(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_IPIP, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_IPIP, indirect=['stdin'])
 def test_ipip_mod(mocked_generic_connection_modify):
     """
     Test if ipip modified
@@ -590,7 +590,7 @@ def test_ipip_mod(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_SIT, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_SIT, indirect=['stdin'])
 def test_create_sit(mocked_generic_connection_create):
     """
     Test if sit created
@@ -620,7 +620,7 @@ def test_create_sit(mocked_generic_connection_create):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_SIT, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_SIT, indirect=['stdin'])
 def test_sit_mod(mocked_generic_connection_modify):
     """
     Test if sit modified
@@ -641,7 +641,7 @@ def test_sit_mod(mocked_generic_connection_modify):
         assert param in args[0]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_ETHERNET_DHCP, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_ETHERNET_DHCP, indirect=['stdin'])
 def test_eth_dhcp_client_id_con_create(mocked_generic_connection_create):
     """
     Test : Ethernet connection created with DHCP_CLIENT_ID

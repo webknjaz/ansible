@@ -76,8 +76,8 @@ def test_systemid_with_requirements(capfd, mocker, patch_rhn):
     assert '123456789' == to_native(rhn.systemid)
 
 
-@pytest.mark.parametrize('patch_ansible_module', [{}], indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
+@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
 def test_systemid_requirements_missing(capfd, mocker, patch_rhn, import_libxml):
     """Check that missing dependencies are detected"""
 
@@ -93,8 +93,8 @@ def test_systemid_requirements_missing(capfd, mocker, patch_rhn, import_libxml):
     assert 'Missing arguments' in results['msg']
 
 
-@pytest.mark.parametrize('patch_ansible_module', [{}], indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
+@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
 def test_without_required_parameters(capfd, patch_rhn):
     """Failure must occurs when all parameters are missing"""
 
@@ -253,8 +253,8 @@ TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize('patch_ansible_module, testcase', TEST_CASES, indirect=['patch_ansible_module'])
-@pytest.mark.usefixtures('patch_ansible_module')
+@pytest.mark.parametrize('stdin, testcase', TEST_CASES, indirect=['stdin'])
+@pytest.mark.usefixtures('stdin')
 def test_register_parameters(mocker, capfd, mock_request, patch_rhn, testcase):
     # successful execution, no output
     mocker.patch.object(basic.AnsibleModule, 'run_command', return_value=(0, '', ''))

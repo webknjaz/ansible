@@ -11,7 +11,7 @@ import pytest
 from ansible.modules.cloud.docker import docker_volume
 from ansible.module_utils.docker import common
 
-pytestmark = pytest.mark.usefixtures('patch_ansible_module')
+pytestmark = pytest.mark.usefixtures('stdin')
 
 TESTCASE_DOCKER_VOLUME = [
     {
@@ -21,7 +21,7 @@ TESTCASE_DOCKER_VOLUME = [
 ]
 
 
-@pytest.mark.parametrize('patch_ansible_module', TESTCASE_DOCKER_VOLUME, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', TESTCASE_DOCKER_VOLUME, indirect=['stdin'])
 def test_create_volume_on_invalid_docker_version(mocker, capfd):
     mocker.patch.object(common, 'HAS_DOCKER_PY', True)
     mocker.patch.object(common, 'docker_version', '1.8.0')

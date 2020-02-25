@@ -14,7 +14,7 @@ def setup_module(close_conn):
 
 
 class TestMyModule():
-    @pytest.mark.parametrize('patch_ansible_module',
+    @pytest.mark.parametrize('stdin',
                              [
                                  {},
                                  {
@@ -30,8 +30,8 @@ class TestMyModule():
                                      "login_password": "Password",
                                  },
                              ],
-                             indirect=['patch_ansible_module'])
-    @pytest.mark.usefixtures('patch_ansible_module')
+                             indirect=['stdin'])
+    @pytest.mark.usefixtures('stdin')
     @mock.patch("ansible.module_utils.remote_management.lxca.common.setup_conn", autospec=True)
     @mock.patch("ansible.modules.remote_management.lxca.lxca_nodes.execute_module", autospec=True)
     def test_without_required_parameters(self, _setup_conn, _execute_module,

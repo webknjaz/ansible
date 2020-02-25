@@ -160,11 +160,11 @@ def test_xenserver_guest_powerstate_set_power_state(mocker, fake_ansible_module,
     assert vm.vm_params['power_state'] == power_state[1].capitalize()
 
 
-@pytest.mark.parametrize('patch_ansible_module',
+@pytest.mark.parametrize('stdin',
                          testcase_module_params_state_present['params'],
                          ids=testcase_module_params_state_present['ids'],
                          indirect=True)
-def test_xenserver_guest_powerstate_present(mocker, patch_ansible_module, capfd, XenAPI, xenserver_guest_powerstate):
+def test_xenserver_guest_powerstate_present(mocker, stdin, capfd, XenAPI, xenserver_guest_powerstate):
     """
     Tests regular module invocation including parsing and propagation of
     module params and module output when state is set to present.
@@ -202,11 +202,11 @@ def test_xenserver_guest_powerstate_present(mocker, patch_ansible_module, capfd,
     assert result['instance'] == fake_vm_facts
 
 
-@pytest.mark.parametrize('patch_ansible_module',
+@pytest.mark.parametrize('stdin',
                          testcase_module_params_state_other['params'],
                          ids=testcase_module_params_state_other['ids'],
                          indirect=True)
-def test_xenserver_guest_powerstate_other(mocker, patch_ansible_module, capfd, XenAPI, xenserver_guest_powerstate):
+def test_xenserver_guest_powerstate_other(mocker, stdin, capfd, XenAPI, xenserver_guest_powerstate):
     """
     Tests regular module invocation including parsing and propagation of
     module params and module output when state is set to other value than
@@ -247,11 +247,11 @@ def test_xenserver_guest_powerstate_other(mocker, patch_ansible_module, capfd, X
     assert result['instance'] == fake_vm_facts
 
 
-@pytest.mark.parametrize('patch_ansible_module',
+@pytest.mark.parametrize('stdin',
                          testcase_module_params_wait['params'],
                          ids=testcase_module_params_wait['ids'],
                          indirect=True)
-def test_xenserver_guest_powerstate_wait(mocker, patch_ansible_module, capfd, XenAPI, xenserver_guest_powerstate):
+def test_xenserver_guest_powerstate_wait(mocker, stdin, capfd, XenAPI, xenserver_guest_powerstate):
     """
     Tests regular module invocation including parsing and propagation of
     module params and module output when wait_for_ip_address option is used.

@@ -9,10 +9,10 @@ from ansible.modules.packaging.os import rhn_channel
 import pytest
 
 
-pytestmark = pytest.mark.usefixtures('patch_ansible_module')
+pytestmark = pytest.mark.usefixtures('stdin')
 
 
-@pytest.mark.parametrize('patch_ansible_module', [{}], indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
 def test_without_required_parameters(capfd):
     with pytest.raises(SystemExit):
         rhn_channel.main()
@@ -127,7 +127,7 @@ TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize('patch_ansible_module, testcase', TEST_CASES, indirect=['patch_ansible_module'])
+@pytest.mark.parametrize('stdin, testcase', TEST_CASES, indirect=['stdin'])
 def test_rhn_channel(capfd, mocker, testcase, mock_request):
     """Check 'msg' and 'changed' results"""
 
