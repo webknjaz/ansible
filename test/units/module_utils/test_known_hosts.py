@@ -92,10 +92,10 @@ def test_get_fqdn_and_port(url, fqdn, port):
     assert known_hosts.get_fqdn_and_port(url) == (fqdn, port)
 
 
-@pytest.mark.parametrize('fqdn, port, add_host_key_cmd, stdin',
+@pytest.mark.parametrize('fqdn, port, add_host_key_cmd, ansible_module_args',
                          ((URLS[k]['get_fqdn'], URLS[k]['port'], URLS[k]['add_host_key_cmd'], {})
                           for k in sorted(URLS) if URLS[k]['is_ssh_url']),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_add_host_key(am, mocker, fqdn, port, add_host_key_cmd):
     get_bin_path = mocker.MagicMock()
     get_bin_path.return_value = keyscan_cmd = "/custom/path/ssh-keyscan"

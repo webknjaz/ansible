@@ -12,7 +12,7 @@ import pytest
 
 from .common import fake_xenapi_ref
 
-pytestmark = pytest.mark.usefixtures('stdin')
+pytestmark = pytest.mark.usefixtures('ansible_module_args')
 
 
 testcase_module_params = {
@@ -45,7 +45,7 @@ testcase_module_params = {
 }
 
 
-@pytest.mark.parametrize('stdin', testcase_module_params['params'], ids=testcase_module_params['ids'], indirect=True)
+@pytest.mark.parametrize('ansible_module_args', testcase_module_params['params'], ids=testcase_module_params['ids'], indirect=True)
 def test_xenserver_guest_info(mocker, capfd, XenAPI, xenserver_guest_info):
     """
     Tests regular module invocation including parsing and propagation of

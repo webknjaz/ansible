@@ -7,10 +7,10 @@ import pytest
 from ansible.modules.packaging.language import pip
 
 
-pytestmark = pytest.mark.usefixtures('stdin')
+pytestmark = pytest.mark.usefixtures('ansible_module_args')
 
 
-@pytest.mark.parametrize('stdin', [{'name': 'six'}], indirect=['stdin'])
+@pytest.mark.parametrize('ansible_module_args', [{'name': 'six'}], indirect=['ansible_module_args'])
 def test_failure_when_pip_absent(mocker, capfd):
     get_bin_path = mocker.patch('ansible.module_utils.basic.AnsibleModule.get_bin_path')
     get_bin_path.return_value = None
@@ -24,7 +24,7 @@ def test_failure_when_pip_absent(mocker, capfd):
     assert 'pip needs to be installed' in results['msg']
 
 
-@pytest.mark.parametrize('stdin, test_input, expected', [
+@pytest.mark.parametrize('ansible_module_args, test_input, expected', [
     [None, ['django>1.11.1', '<1.11.2', 'ipaddress', 'simpleproject<2.0.0', '>1.1.0'],
         ['django>1.11.1,<1.11.2', 'ipaddress', 'simpleproject<2.0.0,>1.1.0']],
     [None, ['django>1.11.1,<1.11.2,ipaddress', 'simpleproject<2.0.0,>1.1.0'],

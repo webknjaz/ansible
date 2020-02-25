@@ -44,9 +44,9 @@ def mock_lchmod(mocker):
     yield m_lchmod
 
 
-@pytest.mark.parametrize('previous_changes, check_mode, exists, stdin',
+@pytest.mark.parametrize('previous_changes, check_mode, exists, ansible_module_args',
                          product((True, False), (True, False), (True, False), ({},)),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_no_mode_given_returns_previous_changes(am, mock_stats, mock_lchmod, mocker, previous_changes, check_mode, exists):
     am.check_mode = check_mode
     mocker.patch('os.lstat', side_effect=[mock_stats['before']])
@@ -58,9 +58,9 @@ def test_no_mode_given_returns_previous_changes(am, mock_stats, mock_lchmod, moc
     assert not m_path_exists.called
 
 
-@pytest.mark.parametrize('mode, check_mode, stdin',
+@pytest.mark.parametrize('mode, check_mode, ansible_module_args',
                          product(SYNONYMS_0660, (True, False), ({},)),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_mode_changed_to_0660(am, mock_stats, mocker, mode, check_mode):
     # Note: This is for checking that all the different ways of specifying
     # 0660 mode work.  It cannot be used to check that setting a mode that is
@@ -77,9 +77,9 @@ def test_mode_changed_to_0660(am, mock_stats, mocker, mode, check_mode):
         m_lchmod.assert_called_with(b'/path/to/file', 0o660)
 
 
-@pytest.mark.parametrize('mode, check_mode, stdin',
+@pytest.mark.parametrize('mode, check_mode, ansible_module_args',
                          product(SYNONYMS_0660, (True, False), ({},)),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_mode_unchanged_when_already_0660(am, mock_stats, mocker, mode, check_mode):
     # Note: This is for checking that all the different ways of specifying
     # 0660 mode work.  It cannot be used to check that setting a mode that is
@@ -93,9 +93,9 @@ def test_mode_unchanged_when_already_0660(am, mock_stats, mocker, mode, check_mo
     assert not m_lchmod.called
 
 
-@pytest.mark.parametrize('check_mode, stdin',
+@pytest.mark.parametrize('check_mode, ansible_module_args',
                          product((True, False), ({},)),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_missing_lchmod_is_not_link(am, mock_stats, mocker, monkeypatch, check_mode):
     """Some platforms have lchmod (*BSD) others do not (Linux)"""
 
@@ -116,9 +116,9 @@ def test_missing_lchmod_is_not_link(am, mock_stats, mocker, monkeypatch, check_m
         m_chmod.assert_called_with(b'/path/to/file/no_lchmod', 0o660)
 
 
-@pytest.mark.parametrize('check_mode, stdin',
+@pytest.mark.parametrize('check_mode, ansible_module_args',
                          product((True, False), ({},)),
-                         indirect=['stdin'])
+                         indirect=['ansible_module_args'])
 def test_missing_lchmod_is_link(am, mock_stats, mocker, monkeypatch, check_mode):
     """Some platforms have lchmod (*BSD) others do not (Linux)"""
 

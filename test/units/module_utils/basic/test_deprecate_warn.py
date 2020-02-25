@@ -8,7 +8,7 @@ import json
 import pytest
 
 
-@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
 def test_warn(am, capfd):
 
     am.warn('warning1')
@@ -19,7 +19,7 @@ def test_warn(am, capfd):
     assert json.loads(out)['warnings'] == ['warning1', 'warning2']
 
 
-@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
 def test_deprecate(am, capfd):
     am.deprecate('deprecation1')
     am.deprecate('deprecation2', '2.3')
@@ -38,7 +38,7 @@ def test_deprecate(am, capfd):
     ]
 
 
-@pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+@pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
 def test_deprecate_without_list(am, capfd):
     with pytest.raises(SystemExit):
         am.exit_json(deprecations='Simple deprecation warning')

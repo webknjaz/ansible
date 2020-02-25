@@ -29,7 +29,7 @@ class TestAnsibleModuleExitJson:
 
     # pylint bug: https://github.com/PyCQA/pylint/issues/511
     # pylint: disable=undefined-variable
-    @pytest.mark.parametrize('args, expected, stdin', ((a, e, {}) for a, e in DATA), indirect=['stdin'])
+    @pytest.mark.parametrize('args, expected, ansible_module_args', ((a, e, {}) for a, e in DATA), indirect=['ansible_module_args'])
     def test_exit_json_exits(self, am, capfd, args, expected):
         with pytest.raises(SystemExit) as ctx:
             am.exit_json(**args)
@@ -41,9 +41,9 @@ class TestAnsibleModuleExitJson:
 
     # Fail_json is only legal if it's called with a message
     # pylint bug: https://github.com/PyCQA/pylint/issues/511
-    @pytest.mark.parametrize('args, expected, stdin',
+    @pytest.mark.parametrize('args, expected, ansible_module_args',
                              ((a, e, {}) for a, e in DATA if 'msg' in a),  # pylint: disable=undefined-variable
-                             indirect=['stdin'])
+                             indirect=['ansible_module_args'])
     def test_fail_json_exits(self, am, capfd, args, expected):
         with pytest.raises(SystemExit) as ctx:
             am.fail_json(**args)
@@ -55,7 +55,7 @@ class TestAnsibleModuleExitJson:
         expected['failed'] = True
         assert return_val == expected
 
-    @pytest.mark.parametrize('stdin', [{}], indirect=['stdin'])
+    @pytest.mark.parametrize('ansible_module_args', [{}], indirect=['ansible_module_args'])
     def test_fail_json_no_msg(self, am):
         with pytest.raises(AssertionError) as ctx:
             am.fail_json()
@@ -96,10 +96,10 @@ class TestAnsibleModuleExitValuesRemoved:
     )
 
     # pylint bug: https://github.com/PyCQA/pylint/issues/511
-    @pytest.mark.parametrize('am, stdin, return_val, expected',
+    @pytest.mark.parametrize('am, ansible_module_args, return_val, expected',
                              (({'username': {}, 'password': {'no_log': True}, 'token': {'no_log': True}}, s, r, e)
                               for s, r, e in DATA),  # pylint: disable=undefined-variable
-                             indirect=['am', 'stdin'])
+                             indirect=['am', 'ansible_module_args'])
     def test_exit_json_removes_values(self, am, capfd, return_val, expected):
         with pytest.raises(SystemExit):
             am.exit_json(**return_val)
@@ -108,10 +108,10 @@ class TestAnsibleModuleExitValuesRemoved:
         assert json.loads(out) == expected
 
     # pylint bug: https://github.com/PyCQA/pylint/issues/511
-    @pytest.mark.parametrize('am, stdin, return_val, expected',
+    @pytest.mark.parametrize('am, ansible_module_args, return_val, expected',
                              (({'username': {}, 'password': {'no_log': True}, 'token': {'no_log': True}}, s, r, e)
                               for s, r, e in DATA),  # pylint: disable=undefined-variable
-                             indirect=['am', 'stdin'])
+                             indirect=['am', 'ansible_module_args'])
     def test_fail_json_removes_values(self, am, capfd, return_val, expected):
         expected['failed'] = True
         with pytest.raises(SystemExit):

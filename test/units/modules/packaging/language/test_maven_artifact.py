@@ -9,7 +9,7 @@ from ansible.modules.packaging.language import maven_artifact
 from ansible.module_utils import basic
 
 
-pytestmark = pytest.mark.usefixtures('stdin')
+pytestmark = pytest.mark.usefixtures('ansible_module_args')
 
 maven_metadata_example = b"""<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
@@ -52,7 +52,7 @@ maven_metadata_example = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-@pytest.mark.parametrize('stdin, version_by_spec, version_choosed', [
+@pytest.mark.parametrize('ansible_module_args, version_by_spec, version_choosed', [
     (None, "(,3.9]", "3.8.2"),
     (None, "3.0", "3.8.2"),
     (None, "[3.7]", "3.7"),

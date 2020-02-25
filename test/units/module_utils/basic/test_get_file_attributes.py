@@ -40,8 +40,8 @@ DATA = (
 )
 
 
-@pytest.mark.parametrize('stdin, data', product(({},), DATA), indirect=['stdin'])
-def test_get_file_attributes(am, stdin, mocker, data):
+@pytest.mark.parametrize('ansible_module_args, data', product(({},), DATA), indirect=['ansible_module_args'])
+def test_get_file_attributes(am, ansible_module_args, mocker, data):
     # Test #18731
     mocker.patch.object(AnsibleModule, 'get_bin_path', return_value=(0, '/usr/bin/lsattr', ''))
     mocker.patch.object(AnsibleModule, 'run_command', return_value=(0, data[0], ''))

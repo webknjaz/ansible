@@ -1812,7 +1812,7 @@ TESTSETS = [
 ]
 
 
-@pytest.mark.parametrize("stdin, testcase", product([{}], TESTSETS), ids=lambda x: x.get('name'), indirect=['stdin'])
+@pytest.mark.parametrize("ansible_module_args, testcase", product([{}], TESTSETS), ids=lambda x: x.get('name'), indirect=['ansible_module_args'])
 def test_distribution_version(am, mocker, testcase):
     """tests the distribution parsing code of the Facts class
 
