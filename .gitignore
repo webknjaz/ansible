@@ -8,7 +8,7 @@ AUTHORS.TXT
 \#*
 # RPM stuff...
 MANIFEST
-dist
+/dist/
 rpm-build
 # Eclipse/PyDev stuff...
 .project
