@@ -7,3 +7,4 @@ jinja2
 PyYAML
 cryptography
 packaging
+resolvelib >= 0.5.2  # New dependency resolver that pip>=20.3 uses
