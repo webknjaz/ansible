@@ -28,6 +28,10 @@ from ansible.utils.display import Display
 from ansible.utils.hashing import secure_hash_s
 
 
+# FIXME: define collection.CollectionRequirement just so the unfixed tests don't impede running the rest
+collection.CollectionRequirement = None
+
+
 @pytest.fixture(autouse='function')
 def reset_cli_args():
     co.GlobalCLIArgs._Singleton__instance = None
