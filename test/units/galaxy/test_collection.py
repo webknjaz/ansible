@@ -609,6 +609,7 @@ def test_publish_with_wait(galaxy_server, collection_artifact, monkeypatch):
 
 def test_find_existing_collections(tmp_path_factory, monkeypatch):
     test_dir = to_text(tmp_path_factory.mktemp('test-ÅÑŚÌβŁÈ Collections'))
+    concrete_artifact_cm = collection.concrete_artifact_manager.ConcreteArtifactsManager(test_dir, validate_certs=False)
     collection1 = os.path.join(test_dir, 'namespace1', 'collection1')
     collection2 = os.path.join(test_dir, 'namespace2', 'collection2')
     fake_collection1 = os.path.join(test_dir, 'namespace3', 'collection3')
@@ -637,28 +638,24 @@ def test_find_existing_collections(tmp_path_factory, monkeypatch):
     mock_warning = MagicMock()
     monkeypatch.setattr(Display, 'warning', mock_warning)
 
-    actual = collection.find_existing_collections(test_dir)
+    actual = list(collection.find_existing_collections(test_dir, artifacts_manager=concrete_artifact_cm))
 
     assert len(actual) == 2
     for actual_collection in actual:
-        assert actual_collection.skip is True
-
-        if str(actual_collection) == 'namespace1.collection1':
+        if '%s.%s' % (actual_collection.namespace, actual_collection.name) == 'namespace1.collection1':
             assert actual_collection.namespace == 'namespace1'
             assert actual_collection.name == 'collection1'
-            assert actual_collection.b_path == to_bytes(collection1)
-            assert actual_collection.api is None
-            assert actual_collection.versions == set(['1.2.3'])
-            assert actual_collection.latest_version == '1.2.3'
-            assert actual_collection.dependencies == {}
+            assert actual_collection.ver == '1.2.3'
+            # assert actual_collection.b_path == to_bytes(collection1)
+            # assert actual_collection.api is None
+            # assert actual_collection.dependencies == {}
         else:
             assert actual_collection.namespace == 'namespace2'
             assert actual_collection.name == 'collection2'
-            assert actual_collection.b_path == to_bytes(collection2)
-            assert actual_collection.api is None
-            assert actual_collection.versions == set(['*'])
-            assert actual_collection.latest_version == '*'
-            assert actual_collection.dependencies == {}
+            assert actual_collection.ver == '*'
+            # assert actual_collection.b_path == to_bytes(collection2)
+            # assert actual_collection.api is None
+            # assert actual_collection.dependencies == {}
 
     assert mock_warning.call_count == 1
     assert mock_warning.mock_calls[0][1][0] == "Collection at '%s' does not have a MANIFEST.json file, cannot " \
