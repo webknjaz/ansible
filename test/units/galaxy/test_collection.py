@@ -60,7 +60,7 @@ def collection_input(tmp_path_factory):
 def collection_artifact(monkeypatch, tmp_path_factory):
     ''' Creates a temp collection artifact and mocked open_url instance for publishing tests '''
     mock_open = MagicMock()
-    monkeypatch.setattr(collection, 'open_url', mock_open)
+    monkeypatch.setattr(collection.concrete_artifact_manager, 'open_url', mock_open)
 
     mock_uuid = MagicMock()
     mock_uuid.return_value.hex = 'uuid'
@@ -672,7 +672,7 @@ def test_download_file(tmp_path_factory, monkeypatch):
 
     mock_open = MagicMock()
     mock_open.return_value = BytesIO(data)
-    monkeypatch.setattr(collection, 'open_url', mock_open)
+    monkeypatch.setattr(collection.concrete_artifact_manager, 'open_url', mock_open)
 
     expected = os.path.join(temp_dir, b'file')
     actual = collection._download_file('http://google.com/file', temp_dir, sha256_hash.hexdigest(), True)
@@ -693,7 +693,7 @@ def test_download_file_hash_mismatch(tmp_path_factory, monkeypatch):
 
     mock_open = MagicMock()
     mock_open.return_value = BytesIO(data)
-    monkeypatch.setattr(collection, 'open_url', mock_open)
+    monkeypatch.setattr(collection.concrete_artifact_manager, 'open_url', mock_open)
 
     expected = "Mismatch artifact hash with downloaded file"
     with pytest.raises(AnsibleError, match=expected):
