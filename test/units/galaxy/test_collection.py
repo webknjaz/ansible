@@ -80,13 +80,13 @@ def collection_artifact(monkeypatch, tmp_path_factory):
 
 
 @pytest.fixture()
-def galaxy_yml(request, tmp_path_factory):
+def galaxy_yml_dir(request, tmp_path_factory):
     b_test_dir = to_bytes(tmp_path_factory.mktemp('test-ÅÑŚÌβŁÈ Collections'))
     b_galaxy_yml = os.path.join(b_test_dir, b'galaxy.yml')
     with open(b_galaxy_yml, 'wb') as galaxy_obj:
         galaxy_obj.write(to_bytes(request.param))
 
-    yield b_galaxy_yml
+    yield b_test_dir
 
 
 @pytest.fixture()
@@ -269,49 +269,51 @@ def test_build_existing_output_with_force(collection_input):
     assert tarfile.is_tarfile(existing_output)
 
 
-@pytest.mark.parametrize('galaxy_yml', [b'namespace: value: broken'], indirect=True)
-def test_invalid_yaml_galaxy_file(galaxy_yml):
-    expected = to_native(b"Failed to parse the galaxy.yml at '%s' with the following error:" % galaxy_yml)
+@pytest.mark.parametrize('galaxy_yml_dir', [b'namespace: value: broken'], indirect=True)
+def test_invalid_yaml_galaxy_file(galaxy_yml_dir):
+    galaxy_file = os.path.join(galaxy_yml_dir, b'galaxy.yml')
+    expected = to_native(b"Failed to parse the galaxy.yml at '%s' with the following error:" % galaxy_file)
 
     with pytest.raises(AnsibleError, match=expected):
-        collection._get_galaxy_yml(galaxy_yml)
+        collection.concrete_artifact_manager._get_meta_from_src_dir(galaxy_yml_dir)
 
 
-@pytest.mark.parametrize('galaxy_yml', [b'namespace: test_namespace'], indirect=True)
-def test_missing_required_galaxy_key(galaxy_yml):
+@pytest.mark.parametrize('galaxy_yml_dir', [b'namespace: test_namespace'], indirect=True)
+def test_missing_required_galaxy_key(galaxy_yml_dir):
+    galaxy_file = os.path.join(galaxy_yml_dir, b'galaxy.yml')
     expected = "The collection galaxy.yml at '%s' is missing the following mandatory keys: authors, name, " \
-               "readme, version" % to_native(galaxy_yml)
+               "readme, version" % to_native(galaxy_file)
 
     with pytest.raises(AnsibleError, match=expected):
-        collection._get_galaxy_yml(galaxy_yml)
+        collection.concrete_artifact_manager._get_meta_from_src_dir(galaxy_yml_dir)
 
 
-@pytest.mark.parametrize('galaxy_yml', [b"""
+@pytest.mark.parametrize('galaxy_yml_dir', [b"""
 namespace: namespace
 name: collection
 authors: Jordan
 version: 0.1.0
 readme: README.md
 invalid: value"""], indirect=True)
-def test_warning_extra_keys(galaxy_yml, monkeypatch):
+def test_warning_extra_keys(galaxy_yml_dir, monkeypatch):
     display_mock = MagicMock()
     monkeypatch.setattr(Display, 'warning', display_mock)
 
-    collection._get_galaxy_yml(galaxy_yml)
+    collection.concrete_artifact_manager._get_meta_from_src_dir(galaxy_yml_dir)
 
     assert display_mock.call_count == 1
-    assert display_mock.call_args[0][0] == "Found unknown keys in collection galaxy.yml at '%s': invalid"\
-        % to_text(galaxy_yml)
+    assert display_mock.call_args[0][0] == "Found unknown keys in collection galaxy.yml at '%s/galaxy.yml': invalid"\
+        % to_text(galaxy_yml_dir)
 
 
-@pytest.mark.parametrize('galaxy_yml', [b"""
+@pytest.mark.parametrize('galaxy_yml_dir', [b"""
 namespace: namespace
 name: collection
 authors: Jordan
 version: 0.1.0
 readme: README.md"""], indirect=True)
-def test_defaults_galaxy_yml(galaxy_yml):
-    actual = collection._get_galaxy_yml(galaxy_yml)
+def test_defaults_galaxy_yml(galaxy_yml_dir):
+    actual = collection.concrete_artifact_manager._get_meta_from_src_dir(galaxy_yml_dir)
 
     assert actual['namespace'] == 'namespace'
     assert actual['name'] == 'collection'
@@ -325,10 +327,10 @@ def test_defaults_galaxy_yml(galaxy_yml):
     assert actual['issues'] is None
     assert actual['tags'] == []
     assert actual['dependencies'] == {}
-    assert actual['license_ids'] == []
+    assert actual['license'] == []
 
 
-@pytest.mark.parametrize('galaxy_yml', [(b"""
+@pytest.mark.parametrize('galaxy_yml_dir', [(b"""
 namespace: namespace
 name: collection
 authors: Jordan
@@ -342,9 +344,9 @@ version: 0.1.0
 readme: README.md
 license:
 - MIT""")], indirect=True)
-def test_galaxy_yml_list_value(galaxy_yml):
-    actual = collection._get_galaxy_yml(galaxy_yml)
-    assert actual['license_ids'] == ['MIT']
+def test_galaxy_yml_list_value(galaxy_yml_dir):
+    actual = collection.concrete_artifact_manager._get_meta_from_src_dir(galaxy_yml_dir)
+    assert actual['license'] == ['MIT']
 
 
 def test_build_ignore_files_and_folders(collection_input, monkeypatch):
