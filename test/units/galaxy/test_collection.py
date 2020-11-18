@@ -223,7 +223,7 @@ def mock_collection(galaxy_server):
 
 def test_build_collection_no_galaxy_yaml():
     fake_path = u'/fake/ÅÑŚÌβŁÈ/path'
-    expected = to_native("The collection galaxy.yml path '%s/galaxy.yml' does not exist." % fake_path)
+    expected = to_native("The collection galaxy.yml path '%s' does not exist." % fake_path)
 
     with pytest.raises(AnsibleError, match=expected):
         collection.build_collection(fake_path, 'output', False)
@@ -673,7 +673,7 @@ def test_download_file(tmp_path_factory, monkeypatch):
     mock_open.return_value = BytesIO(data)
     monkeypatch.setattr(collection.concrete_artifact_manager, 'open_url', mock_open)
 
-    expected = os.path.join(temp_dir, b'file')
+    expected = temp_dir
     actual = collection._download_file('http://google.com/file', temp_dir, sha256_hash.hexdigest(), True)
 
     assert actual.startswith(expected)
@@ -775,7 +775,8 @@ def test_require_one_of_collections_requirements_with_collections():
 
     requirements = cli._require_one_of_collections_requirements(collections, '')['collections']
 
-    assert requirements == [('namespace1.collection1', '*', None, None), ('namespace2.collection1', '1.0.0', None, None)]
+    req_tuples = [('%s.%s' % (req.namespace, req.name), req.ver, req.src, req.type,) for req in requirements]
+    assert req_tuples == [('namespace1.collection1', '*', None, 'galaxy'), ('namespace2.collection1', '1.0.0', None, 'galaxy')]
 
 
 @patch('ansible.cli.galaxy.GalaxyCLI._parse_requirements_file')
