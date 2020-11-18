@@ -69,7 +69,8 @@
     dest: '{{ galaxy_dir }}/download/download.yml'
 
 - name: download collection with req to custom dir
-  command: ansible-galaxy collection download -r '{{ galaxy_dir }}/download/download.yml' -s galaxy_ng -p '{{ galaxy_dir }}/download/collections-custom' {{ galaxy_verbosity }}
+  # FIXME: --pre should be implicit when exact prerelease version is given
+  command: ansible-galaxy collection download -r '{{ galaxy_dir }}/download/download.yml' -s galaxy_ng -p '{{ galaxy_dir }}/download/collections-custom' {{ galaxy_verbosity }} --pre
   register: download_req_custom_path
 
 - name: get result of download collection with req to custom dir
