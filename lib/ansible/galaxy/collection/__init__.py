@@ -977,7 +977,23 @@ def find_existing_collections(path, artifacts_manager):
             if not os.path.isdir(b_collection_path):
                 continue
 
-            req = Candidate.from_dir_path_as_installed(b_collection_path, artifacts_manager)
+            b_manifest_path = os.path.join(b_collection_path, b'MANIFEST.json')
+            b_galaxy_yml_path = os.path.join(b_collection_path, b'galaxy.yml')
+
+            if os.path.exists(b_manifest_path):
+                req = Candidate.from_dir_path_as_installed(b_collection_path, artifacts_manager)
+            elif os.path.exists(b_galaxy_yml_path):
+                # allow badly formatted galaxy.yml files?
+                req = Candidate.from_dir_path_as_dev(b_collection_path, artifacts_manager)
+            else:
+                # no metadata was found
+                display.warning(
+                    "Collection at '%s' does not have a MANIFEST.json file, cannot detect version." % to_text(
+                        b_collection_path, errors='surrogate_or_strict'
+                    )
+                )
+                req = Candidate.from_dir_path_as_unknown(b_collection_path)
+
             display.vvv(
                 "Found installed collection {coll!s} at '{path!s}'".
                 format(coll=to_text(req), path=to_text(req.src))

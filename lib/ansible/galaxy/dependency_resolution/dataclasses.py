@@ -124,6 +124,25 @@ def _is_fqcn(tested_str):
 class _ComputedReqKindsMixin:
 
     @classmethod
+    def from_dir_path_as_unknown(cls, dir_path):
+        if os.path.isdir(dir_path):
+            return cls.from_dir_path_implicit(dir_path)
+        raise AnsibleError("The collection directory '{0}' doesn't exist".format(dir_path))
+
+    @classmethod
+    def from_dir_path_as_dev(cls, dir_path, art_mgr):
+        if _is_collection_src_dir(dir_path):
+            return cls.from_dir_path(dir_path, art_mgr)
+
+        raise AnsibleError(
+            '`{path!s}` must be an installed collection directory. It '
+            'does not appear to have a {file_name!s}. A '
+            '{file_name!s} is expected if the collection will be '
+            'built and installed via ansible-galaxy.'.
+            format(path=dir_path, file_name='galaxy.yml'),
+        )
+
+    @classmethod
     def from_dir_path_as_installed(cls, dir_path, art_mgr):
         if _is_installed_collection_dir(dir_path):
             return cls.from_dir_path(dir_path, art_mgr)
@@ -152,6 +171,14 @@ class _ComputedReqKindsMixin:
         req_name = art_mgr.get_direct_collection_fqcn(tmp_inst_req)
         req_version = art_mgr.get_direct_collection_version(tmp_inst_req)
 
+        return cls(req_name, req_version, dir_path, 'dir')
+
+    @classmethod
+    def from_dir_path_implicit(cls, dir_path):
+        # There is no metadata, but it isn't required for a functional collection. Determine the namespace.name from the path.
+        path_list = to_text(dir_path, errors='surrogate_or_strict').split(os.path.sep)
+        req_name = '%s.%s' % (path_list[-2], path_list[-1])
+        req_version = '*'
         return cls(req_name, req_version, dir_path, 'dir')
 
     @classmethod

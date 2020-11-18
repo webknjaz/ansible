@@ -1357,10 +1357,23 @@ class GalaxyCLI(CLI):
                     continue
 
                 collection_found = True
-                collection = Requirement.from_dir_path_as_installed(
-                    b_collection_path, artifacts_manager,
-                )
-                fqcn_width, version_width = _get_collection_widths(collection)
+
+                b_manifest_path = os.path.join(b_collection_path, b'MANIFEST.json')
+                b_galaxy_yml_path = os.path.join(b_collection_path, b'galaxy.yml')
+
+                if os.path.exists(b_manifest_path):
+                    collection = Requirement.from_dir_path_as_installed(
+                        b_collection_path, artifacts_manager,
+                    )
+                elif os.path.exists(b_galaxy_yml_path):
+                    collection = Requirement.from_dir_path_as_dev(
+                        b_collection_path, artifacts_manager,
+                    )
+                else:
+                    collection = Requirement.from_dir_path_as_unknown(
+                        b_collection_path,
+                    )
+                fqcn_width, version_width = _get_collection_widths([collection])
 
                 _display_header(collection_path, 'Collection', 'Version', fqcn_width, version_width)
                 _display_collection(collection, fqcn_width, version_width)
