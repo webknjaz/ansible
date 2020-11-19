@@ -223,7 +223,7 @@ def mock_collection(galaxy_server):
 
 def test_build_collection_no_galaxy_yaml():
     fake_path = u'/fake/ÅÑŚÌβŁÈ/path'
-    expected = to_native("The collection galaxy.yml path '%s' does not exist." % fake_path)
+    expected = to_native("The collection galaxy.yml path '%s/galaxy.yml' does not exist." % fake_path)
 
     with pytest.raises(AnsibleError, match=expected):
         collection.build_collection(fake_path, 'output', False)
