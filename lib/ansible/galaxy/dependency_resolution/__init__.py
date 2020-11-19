@@ -5,3 +5,42 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
+
+try:
+    from typing import TYPE_CHECKING
+except ImportError:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    from typing import Iterable
+    from ansible.galaxy.api import GalaxyAPI
+    from ansible.galaxy.collection.concrete_artifact_manager import (
+        ConcreteArtifactsManager,
+    )
+
+from ansible.galaxy.collection.galaxy_api_proxy import MultiGalaxyAPIProxy
+from ansible.galaxy.dependency_resolution.providers import CollectionDependencyProvider
+from ansible.galaxy.dependency_resolution.reporters import CollectionDependencyReporter
+from ansible.galaxy.dependency_resolution.resolvers import CollectionDependencyResolver
+
+
+def build_collection_dependency_resolver(
+        galaxy_apis,  # type: Iterable[GalaxyAPI]
+        concrete_artifacts_manager,  # type: ConcreteArtifactsManager
+        with_deps=True,  # type: bool
+        with_pre_releases=False,  # type: bool
+):  # type: (...) -> CollectionDependencyResolver
+    """Return a collection dependency resolver.
+
+    The returned instance will have a ``resolve()`` method for
+    further consumption.
+    """
+    return CollectionDependencyResolver(
+        CollectionDependencyProvider(
+            apis=MultiGalaxyAPIProxy(galaxy_apis, concrete_artifacts_manager),
+            concrete_artifacts_manager=concrete_artifacts_manager,
+            with_deps=with_deps,
+            with_pre_releases=with_pre_releases,
+        ),
+        CollectionDependencyReporter(),
+    )
