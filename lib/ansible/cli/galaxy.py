@@ -793,7 +793,7 @@ class GalaxyCLI(CLI):
 
         for collection_path in context.CLIARGS['args']:
             collection_path = GalaxyCLI._resolve_path(collection_path)
-            build_collection(collection_path, output_path, force)
+            build_collection(collection_path, b_output_path, force)
 
     @with_collection_artifacts_manager
     def execute_download(self, artifacts_manager=None):
