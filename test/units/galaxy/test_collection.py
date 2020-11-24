@@ -234,7 +234,7 @@ def test_build_existing_output_file(collection_input):
     expected = "The output collection artifact '%s' already exists, but is a directory - aborting" \
                % to_native(existing_output_dir)
     with pytest.raises(AnsibleError, match=expected):
-        collection.build_collection(input_dir, output_dir, False)
+        collection.build_collection(input_dir, to_bytes(output_dir, errors='surrogate_or_strict'), False)
 
 
 def test_build_existing_output_without_force(collection_input):
@@ -248,7 +248,7 @@ def test_build_existing_output_without_force(collection_input):
     expected = "The file '%s' already exists. You can use --force to re-create the collection artifact." \
                % to_native(existing_output)
     with pytest.raises(AnsibleError, match=expected):
-        collection.build_collection(input_dir, output_dir, False)
+        collection.build_collection(input_dir, to_bytes(output_dir, errors='surrogate_or_strict'), False)
 
 
 def test_build_existing_output_with_force(collection_input):
@@ -259,7 +259,7 @@ def test_build_existing_output_with_force(collection_input):
         out_file.write("random garbage")
         out_file.flush()
 
-    collection.build_collection(input_dir, output_dir, True)
+    collection.build_collection(input_dir, to_bytes(output_dir, errors='surrogate_or_strict'), True)
 
     # Verify the file was replaced with an actual tar file
     assert tarfile.is_tarfile(existing_output)
@@ -529,7 +529,7 @@ def test_build_with_symlink_inside_collection(collection_input):
     os.symlink(roles_target, roles_link)
     os.symlink(os.path.join(input_dir, 'README.md'), file_link)
 
-    collection.build_collection(input_dir, output_dir, False)
+    collection.build_collection(input_dir, to_bytes(output_dir, errors='surrogate_or_strict'), False)
 
     output_artifact = os.path.join(output_dir, 'ansible_namespace-collection-0.1.0.tar.gz')
     assert tarfile.is_tarfile(output_artifact)
