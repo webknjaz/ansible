@@ -1358,21 +1358,14 @@ class GalaxyCLI(CLI):
 
                 collection_found = True
 
-                b_manifest_path = os.path.join(b_collection_path, b'MANIFEST.json')
-                b_galaxy_yml_path = os.path.join(b_collection_path, b'galaxy.yml')
-
-                if os.path.exists(b_manifest_path):
-                    collection = Requirement.from_dir_path_as_installed(
-                        b_collection_path, artifacts_manager,
-                    )
-                elif os.path.exists(b_galaxy_yml_path):
-                    collection = Requirement.from_dir_path_as_dev(
-                        b_collection_path, artifacts_manager,
-                    )
-                else:
+                try:
                     collection = Requirement.from_dir_path_as_unknown(
                         b_collection_path,
+                        artifacts_manager,
                     )
+                except ValueError as val_err:
+                    six.raise_from(AnsibleError(val_err), val_err)
+
                 fqcn_width, version_width = _get_collection_widths([collection])
 
                 _display_header(collection_path, 'Collection', 'Version', fqcn_width, version_width)

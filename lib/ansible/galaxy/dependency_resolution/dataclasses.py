@@ -19,7 +19,15 @@ except ImportError:
     TYPE_CHECKING = False
 
 if TYPE_CHECKING:
-    from typing import Tuple
+    from typing import Tuple, Type, TypeVar
+    from ansible.galaxy.collection.concrete_artifact_manager import (
+        ConcreteArtifactsManager,
+    )
+    Collection = TypeVar(
+        'Collection',
+        'Candidate', 'Requirement',
+        '_ComputedReqKindsMixin',
+    )
 
 import yaml
 
@@ -27,6 +35,7 @@ from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_bytes, to_native, to_text
 from ansible.module_utils.six.moves.urllib.parse import urlparse
 from ansible.module_utils.six import raise_from
+from ansible.utils.display import Display
 
 
 try:  # NOTE: py3/py2 compat
@@ -46,6 +55,9 @@ except AttributeError:  # Python 2
 _ALLOW_CONCRETE_POINTER_IN_SOURCE = False  # NOTE: This is a feature flag
 _GALAXY_YAML = b'galaxy.yml'
 _MANIFEST_JSON = b'MANIFEST.json'
+
+
+display = Display()
 
 
 def _is_collection_src_dir(dir_path):
@@ -124,22 +136,53 @@ def _is_fqcn(tested_str):
 class _ComputedReqKindsMixin:
 
     @classmethod
-    def from_dir_path_as_unknown(cls, dir_path):
+    def from_dir_path_as_unknown(  # type: ignore
+            cls,  # type: Type[Collection]
+            dir_path,  # type: bytes
+            art_mgr,  # type: ConcreteArtifactsManager
+    ):  # type: (...)  -> Collection
+        """Make collection from an unspecified dir type."""
+        try:
+            return cls.from_dir_path_as_installed(dir_path, art_mgr)
+        except ValueError:
+            pass
+
+        try:
+            return cls.from_dir_path_as_dev(dir_path, art_mgr)
+        except ValueError:
+            pass
+
+        display.warning(
+            "Collection at '{path!s}' does not have a {manifest_json!s} file, "
+            'nor has it {galaxy_yml!s}: cannot detect version.'.
+            format(
+                galaxy_yml=to_native(_GALAXY_YAML),
+                manifest_json=to_native(_GALAXY_YAML),
+                path=to_text(dir_path, errors='surrogate_or_strict'),
+            ),
+        )
         if os.path.isdir(dir_path):
             return cls.from_dir_path_implicit(dir_path)
-        raise AnsibleError("The collection directory '{0}' doesn't exist".format(dir_path))
+        raise ValueError(
+            "The collection directory '{path!s}' doesn't exist".
+            format(path=to_native(dir_path)),
+        )
 
     @classmethod
-    def from_dir_path_as_dev(cls, dir_path, art_mgr):
+    def from_dir_path_as_dev(  # type: ignore
+            cls,  # type: Type[Collection]
+            dir_path,  # type: bytes
+            art_mgr,  # type: ConcreteArtifactsManager
+    ):  # type: (...)  -> Collection
         if _is_collection_src_dir(dir_path):
             return cls.from_dir_path(dir_path, art_mgr)
 
-        raise AnsibleError(
+        raise ValueError(
             '`{path!s}` must be an installed collection directory. It '
             'does not appear to have a {file_name!s}. A '
             '{file_name!s} is expected if the collection will be '
             'built and installed via ansible-galaxy.'.
-            format(path=dir_path, file_name='galaxy.yml'),
+            format(path=dir_path, file_name=to_native(_GALAXY_YAML)),
         )
 
     @classmethod
@@ -147,7 +190,7 @@ class _ComputedReqKindsMixin:
         if _is_installed_collection_dir(dir_path):
             return cls.from_dir_path(dir_path, art_mgr)
 
-        raise AnsibleError(
+        raise ValueError(
             '`{path!s}` must be an installed collection directory. It '
             'does not appear to have a {manifest_name!s}. A '
             '{manifest_name!s} is expected if the collection has been '
@@ -174,12 +217,21 @@ class _ComputedReqKindsMixin:
         return cls(req_name, req_version, dir_path, 'dir')
 
     @classmethod
-    def from_dir_path_implicit(cls, dir_path):
+    def from_dir_path_implicit(  # type: ignore
+            cls,  # type: Type[Collection]
+            dir_path,  # type: bytes
+    ):  # type: (...)  -> Collection
+        """Construct a collection instance based on an arbitrary dir.
+
+        This alternative constructor infers the FQCN based on the parent
+        and current directory names. It also sets the version to "*"
+        regardless of whether any of known metadata files are present.
+        """
         # There is no metadata, but it isn't required for a functional collection. Determine the namespace.name from the path.
-        path_list = to_text(dir_path, errors='surrogate_or_strict').split(os.path.sep)
-        req_name = '%s.%s' % (path_list[-2], path_list[-1])
-        req_version = '*'
-        return cls(req_name, req_version, dir_path, 'dir')
+        u_dir_path = to_text(dir_path, errors='surrogate_or_strict')
+        path_list = u_dir_path.split(os.path.sep)
+        req_name = '.'.join(path_list[-2:])
+        return cls(req_name, '*', dir_path, 'dir')  # type: ignore
 
     @classmethod
     def from_string(cls, collection_input, artifacts_manager):
