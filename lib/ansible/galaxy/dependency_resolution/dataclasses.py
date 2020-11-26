@@ -141,70 +141,41 @@ class _ComputedReqKindsMixin:
             dir_path,  # type: bytes
             art_mgr,  # type: ConcreteArtifactsManager
     ):  # type: (...)  -> Collection
-        """Make collection from an unspecified dir type."""
-        try:
-            return cls.from_dir_path_as_installed(dir_path, art_mgr)
-        except ValueError:
-            pass
+        """Make collection from an unspecified dir type.
+
+        This alternative constructor attempts to grab metadata from the
+        given path if it's a directory. If there's no metadata, it
+        falls back to guessing the FQCN based on the directory path and
+        sets the version to "*".
+
+        It raises a ValueError immediatelly if the input is not an
+        existing directory path.
+        """
+        if not os.path.isdir(dir_path):
+            raise ValueError(
+                "The collection directory '{path!s}' doesn't exist".
+                format(path=to_native(dir_path)),
+            )
 
         try:
-            return cls.from_dir_path_as_dev(dir_path, art_mgr)
+            return cls.from_dir_path(dir_path, art_mgr)
         except ValueError:
-            pass
-
-        display.warning(
-            "Collection at '{path!s}' does not have a {manifest_json!s} file, "
-            'nor has it {galaxy_yml!s}: cannot detect version.'.
-            format(
-                galaxy_yml=to_native(_GALAXY_YAML),
-                manifest_json=to_native(_GALAXY_YAML),
-                path=to_text(dir_path, errors='surrogate_or_strict'),
-            ),
-        )
-        if os.path.isdir(dir_path):
             return cls.from_dir_path_implicit(dir_path)
-        raise ValueError(
-            "The collection directory '{path!s}' doesn't exist".
-            format(path=to_native(dir_path)),
-        )
-
-    @classmethod
-    def from_dir_path_as_dev(  # type: ignore
-            cls,  # type: Type[Collection]
-            dir_path,  # type: bytes
-            art_mgr,  # type: ConcreteArtifactsManager
-    ):  # type: (...)  -> Collection
-        if _is_collection_src_dir(dir_path):
-            return cls.from_dir_path(dir_path, art_mgr)
-
-        raise ValueError(
-            '`{path!s}` must be an installed collection directory. It '
-            'does not appear to have a {file_name!s}. A '
-            '{file_name!s} is expected if the collection will be '
-            'built and installed via ansible-galaxy.'.
-            format(path=dir_path, file_name=to_native(_GALAXY_YAML)),
-        )
-
-    @classmethod
-    def from_dir_path_as_installed(cls, dir_path, art_mgr):
-        if _is_installed_collection_dir(dir_path):
-            return cls.from_dir_path(dir_path, art_mgr)
-
-        raise ValueError(
-            '`{path!s}` must be an installed collection directory. It '
-            'does not appear to have a {manifest_name!s}. A '
-            '{manifest_name!s} is expected if the collection has been '
-            'built and installed via ansible-galaxy.'.
-            format(
-                path=to_native(dir_path),
-                manifest_name=to_native(_MANIFEST_JSON),
-            ),
-        )
 
     @classmethod
     def from_dir_path(cls, dir_path, art_mgr):
+        """Make collection from an directory with metadata."""
         b_dir_path = to_bytes(dir_path, errors='surrogate_or_strict')
         if not _is_collection_dir(b_dir_path):
+            display.warning(
+                "Collection at '{path!s}' does not have a {manifest_json!s} "
+                'file, nor has it {galaxy_yml!s}: cannot detect version.'.
+                format(
+                    galaxy_yml=to_native(_GALAXY_YAML),
+                    manifest_json=to_native(_GALAXY_YAML),
+                    path=to_text(dir_path, errors='surrogate_or_strict'),
+                ),
+            )
             raise ValueError(
                 '`dir_path` argument must be an installed or a source'
                 ' collection directory.',
