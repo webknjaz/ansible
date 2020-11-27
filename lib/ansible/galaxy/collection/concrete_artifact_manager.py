@@ -466,7 +466,7 @@ def _get_meta_from_dir(
 ):  # type: (...) -> Dict[str, Optional[Union[str, List[str], Dict[str, str]]]]
     try:
         return _get_meta_from_installed_dir(b_path)
-    except (LookupError, ValueError):
+    except LookupError:
         return _get_meta_from_src_dir(b_path)
 
 
