@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     )
 
 from ansible.galaxy.api import GalaxyAPI, GalaxyError
+from ansible.module_utils.six.moves.http_client import (
+    NOT_FOUND as _HTTP_NOT_FOUND,
+)
 
 
 class MultiGalaxyAPIProxy:
@@ -55,7 +58,7 @@ class MultiGalaxyAPIProxy:
         return set(
             (version, api)
             for api in api_lookup_order
-            for version in api.get_collection_versions(
+            for version in _http_404_to_empty(api.get_collection_versions)(
                 requirement.namespace, requirement.name,
             )
         )
@@ -105,3 +108,14 @@ class MultiGalaxyAPIProxy:
             get_collection_version_metadata(collection_candidate).
             dependencies
         )
+
+
+def _http_404_to_empty(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except GalaxyError as glxy_err:
+            if glxy_err.http_code == _HTTP_NOT_FOUND:
+                return []
+            raise
+    return wrapper
