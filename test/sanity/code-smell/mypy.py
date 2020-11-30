@@ -17,8 +17,11 @@ def run_mypy(python_version=None):
             () if python_version is None
             else ('--python-version', python_version)
         ),
+        # 'hacking/shippable/incidental.py',
         'lib/ansible/galaxy/collection/',
         'lib/ansible/galaxy/dependency_resolution',
+        # 'test/lib/ansible_test/_internal',
+        # 'test/utils/shippable/check_matrix.py',
     )
     try:
         mypy_out = subprocess.check_output(mypy_cmd, universal_newlines=True)
