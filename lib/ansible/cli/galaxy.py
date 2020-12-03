@@ -461,7 +461,7 @@ class GalaxyCLI(CLI):
 
         # Need to filter out empty strings or non truthy values as an empty server list env var is equal to [''].
         server_list = [s for s in C.GALAXY_SERVER_LIST or [] if s]
-        for server_key in server_list:
+        for server_priority, server_key in enumerate(server_list, start=1):
             # Config definitions are looked up dynamically based on the C.GALAXY_SERVER_LIST entry. We look up the
             # section [galaxy_server.<server>] for the values url, username, password, and token.
             config_dict = dict((k, server_config_def(server_key, k, req)) for k, req in server_def)
@@ -500,7 +500,11 @@ class GalaxyCLI(CLI):
                         server_options['token'] = GalaxyToken(token=token_val)
 
             server_options.update(galaxy_options)
-            config_servers.append(GalaxyAPI(self.galaxy, server_key, **server_options))
+            config_servers.append(GalaxyAPI(
+                self.galaxy, server_key,
+                priority=server_priority,
+                **server_options,
+            ))
 
         cmd_server = context.CLIARGS['api_server']
         cmd_token = GalaxyToken(token=context.CLIARGS['api_key'])
@@ -511,15 +515,21 @@ class GalaxyCLI(CLI):
             if config_server:
                 self.api_servers.append(config_server)
             else:
-                self.api_servers.append(GalaxyAPI(self.galaxy, 'cmd_arg', cmd_server, token=cmd_token,
-                                                  **galaxy_options))
+                self.api_servers.append(GalaxyAPI(
+                    self.galaxy, 'cmd_arg', cmd_server, token=cmd_token,
+                    priority=len(config_servers) + 1,
+                    **galaxy_options,
+                ))
         else:
             self.api_servers = config_servers
 
         # Default to C.GALAXY_SERVER if no servers were defined
         if len(self.api_servers) == 0:
-            self.api_servers.append(GalaxyAPI(self.galaxy, 'default', C.GALAXY_SERVER, token=cmd_token,
-                                              **galaxy_options))
+            self.api_servers.append(GalaxyAPI(
+                self.galaxy, 'default', C.GALAXY_SERVER, token=cmd_token,
+                priority=0,
+                **galaxy_options,
+            ))
 
         context.CLIARGS['func']()
 
