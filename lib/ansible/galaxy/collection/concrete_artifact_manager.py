@@ -105,6 +105,14 @@ class ConcreteArtifactsManager:
                 ),
                 err,
             )
+        else:
+            display.vvv(
+                "Collection '{coll!s}' obtained from "
+                'server {server!s} {url!s}'.format(
+                    coll=collection, server=collection.src,
+                    url=collection.src.api_server,
+                )
+            )
 
         self._galaxy_artifact_cache[collection] = b_artifact_path
         return b_artifact_path
