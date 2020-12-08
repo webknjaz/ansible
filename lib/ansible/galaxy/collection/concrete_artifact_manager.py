@@ -109,8 +109,9 @@ class ConcreteArtifactsManager:
             display.vvv(
                 "Collection '{coll!s}' obtained from "
                 'server {server!s} {url!s}'.format(
-                    coll=collection, server=collection.src,
-                    url=collection.src.api_server,
+                    coll=collection, server=collection.src or 'Galaxy',
+                    url=collection.src.api_server if collection.src is not None
+                    else '',
                 )
             )
 
