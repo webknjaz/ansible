@@ -160,8 +160,6 @@ class CollectionDependencyProvider(AbstractProvider):
                 candidate for candidate in (
                     Candidate(fqcn, version, src_server, 'galaxy')  # FIXME: type=galaxy?
                     for version, src_server in coll_versions
-                    if self._with_pre_releases or
-                    not is_pre_release(version)
                 )
                 for requirement in requirements
                 if self.is_satisfied_by(requirement, candidate)
@@ -182,6 +180,17 @@ class CollectionDependencyProvider(AbstractProvider):
         A boolean should be returned to indicate whether `candidate` is a
         viable solution to the requirement.
         """
+        # NOTE: Only allow pre-release candidates if we want pre-releases or
+        # the req ver was an exact match with the pre-release version.
+        allow_pre_release = self._with_pre_releases or not (
+            requirement.ver == '*' or
+            requirement.ver.startswith('<') or
+            requirement.ver.startswith('>') or
+            requirement.ver.startswith('!=')
+        )
+        if is_pre_release(candidate.ver) and not allow_pre_release:
+            return False
+
         # NOTE: This is a set of Pipenv-inspired optimizations. Ref:
         # https://github.com/sarugaku/passa/blob/2ac00f1/src/passa/models/providers.py#L58-L74
         if (
