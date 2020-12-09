@@ -448,12 +448,6 @@ def install_collections(
         coll for coll in existing_collections
         if coll.fqcn not in requested_requirements_names
     }
-    # NOTE: Pin installed collection versions that are
-    # NOTE: not directly requested via CLI if `--force-deps` is not set
-    requested_requirements |= (
-        set() if force_deps
-        else existing_non_requested_collections
-    )
 
     if not requested_requirements:
         display.display(
@@ -462,6 +456,13 @@ def install_collections(
             'consider using `--force`.'
         )
         return
+
+    # NOTE: Pin installed collection versions that are
+    # NOTE: not directly requested via CLI if `--force-deps` is not set
+    requested_requirements |= (
+        set() if force_deps
+        else existing_non_requested_collections
+    )
 
     with _display_progress("Process install dependency map"):
         # FIXME: Attempt to resolve deps with installed collections
