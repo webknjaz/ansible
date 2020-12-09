@@ -40,7 +40,7 @@
 - name: assert install existing without --force - {{ test_name }}
   assert:
     that:
-    - '"Skipping ''namespace1.name1'' as it is already installed" in install_existing_no_force.stdout'
+    - '"Nothing to do. All requested collections are already installed" in install_existing_no_force.stdout'
 
 - name: install existing with --force - {{ test_name }}
   command: ansible-galaxy collection install namespace1.name1 -s '{{ test_name }}' --force {{ galaxy_verbosity }}

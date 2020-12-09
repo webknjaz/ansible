@@ -107,7 +107,6 @@
   - name: pulp_v3
     server: '{{ pulp_server }}published/api/'
     v3: true
-  when: False  # FIXME: temporarily skip failing tests
 
 - name: publish collection with a dep on another server
   setup_collections:
