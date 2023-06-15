@@ -737,7 +737,11 @@ def main():
     resp.update(info)
 
     resp['elapsed'] = elapsed
-    resp['status'] = int(resp['status'])
+    resp['status'] = (
+        int(resp['status']) if resp['status'].isdigit()
+        else 200 if resp['status'].startswith('OK')
+        else 500
+    )
     resp['changed'] = False
 
     # Write the file out if requested
