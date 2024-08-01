@@ -100,6 +100,10 @@ class LinuxHardware(Hardware):
             mount_facts = self.get_mount_facts()
         except timeout.TimeoutError:
             self.module.warn("No mount facts were gathered due to timeout.")
+        except Exception as exc:
+            import traceback
+            self.module.warn(f"=> {exc=} {exc.__context__=} {exc.__cause__=} {traceback.format_exc()=}")
+            raise
 
         hardware_facts.update(cpu_facts)
         hardware_facts.update(memory_facts)
@@ -568,17 +572,25 @@ class LinuxHardware(Hardware):
 
     def get_mount_facts(self):
 
+        self.module.warn('=> IN MOUNT FACTS')
         mounts = []
 
         # gather system lists
         bind_mounts = self._find_bind_mounts()
         uuids = self._lsblk_uuid()
         mtab_entries = self._mtab_entries()
+        self.module.warn(f'=> {bind_mounts=} {uuids=} {mtab_entries=}')
 
         # start threads to query each mount
         results = {}
-        pool = ThreadPool(processes=min(len(mtab_entries), cpu_count()))
+        self.module.warn(f'=> PRE THREAD POOL')
+        try:
+            pool = ThreadPool(processes=min(len(mtab_entries), cpu_count()))
+        except PermissionError:
+            raise  # handle this!
+        self.module.warn(f'=> POST THREAD POOL')
         maxtime = timeout.GATHER_TIMEOUT or timeout.DEFAULT_GATHER_TIMEOUT
+        self.module.warn(f'=> {maxtime=}')
         for fields in mtab_entries:
             # Transform octal escape sequences
             fields = [self._replace_octal_escapes(field) for field in fields]
