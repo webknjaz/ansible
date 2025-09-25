@@ -4,6 +4,25 @@
     path: '{{ galaxy_dir }}/ansible_collections'
     state: directory
 
+- name: "install transitive compatible collection single version"
+  command: "ansible-galaxy collection install ns_requires_ansible_indirectly.name_requires_ansible_indirectly_compatible"
+  environment:
+    ANSIBLE_COLLECTIONS_PATH: '{{ galaxy_dir }}/ansible_collections'
+  register: transitive_compat
+- name: Log transitive compatible collection install result
+  debug:
+    var: transitive_compat
+
+- name: "install transitive incompatible collection"
+  command: "ansible-galaxy collection install ns_requires_ansible_indirectly.name_requires_ansible_indirectly_incompatible"
+  environment:
+    ANSIBLE_COLLECTIONS_PATH: '{{ galaxy_dir }}/ansible_collections'
+  register: transitive_incompat_failure
+  failed_when: transitive_incompat_failure is success
+- name: Log transitive incompatible collection install result
+  debug:
+    var: transitive_incompat_failure
+
 - name: install simple collection from first accessible server
   command: ansible-galaxy collection install namespace1.name1 -vvvv
   environment:
